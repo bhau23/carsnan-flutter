@@ -1,0 +1,132 @@
+---
+alwaysApply: true
+---
+
+# Android Instructions
+
+// Complete Flutter Architecture Guide & Rules (.cursorrules)
+
+This file serves as both a configuration for linting/automation and as the
+
+// single source of truth for the architectural standards of this project
+// 1. PHILOSOPHY: MVVM + CLEAN ARCHITECTURE
+//
+// - Clean Architecture: Dependencies must only point inwards
+// (Presentation -> Domain <- Data). The Domain (business logic) is the core
+// and knows nothing about UI or data sources
+// - MVVM (Model-View-ViewModel): The Presentation layer is split
+// - View (Pages/Widgets): The UI. Dumb and reactive
+// - ViewModel (Bloc/Cubit): The bridge. Manages UI state and talks to the Domain
+// - Modularity: The app is built as a collection of independent "features"
+// 2. DIRECTORY STRUCTURE
+//
+// The project follows a "feature-first" structure. This is enforced by the
+// 'required_feature_subdirectories' rule below
+//
+// flutter_app/
+// ├── lib/
+// │   ├── main.dart
+// │   ├── core/         // Shared code (networking, theme, utils, etc.)
+// │   └── features/
+// │       └── [feature_name]/
+// │           ├── data/
+// │           │   ├── datasources/
+// │           │   ├── models/
+// │           │   └── repositories/
+// │           ├── domain/
+// │           │   ├── entities/
+// │           │   ├── repositories/
+// │           │   └── usecases/
+// │           └── presentation/
+// │               ├── bloc/ or cubit/
+// │               ├── pages/
+// │               └── widgets/
+// ├── test/             // Mirrors the lib/ structure for unit/widget tests
+// └── .cursorrules
+// 3. RECOMMENDED THIRD-PARTY LIBRARIES
+//
+// To maintain consistency and leverage powerful, community-vetted tools, this
+// project recommends the following libraries for specific tasks
+//
+// - State Management: flutter_bloc / bloc
+// - Why: Predictable state management that separates business logic from UI
+// - Usage: Use Cubit for simple state, Bloc for complex, event-driven state
+//
+// - Routing: go_router
+// - Why: A declarative routing package that simplifies navigation, deep linking
+//   and passing arguments while reducing boilerplate. Maintained by the Flutter team
+//
+// - Dependency Injection (DI): get_it & injectable
+// - Why: `get_it` is a fast and simple service locator. `injectable` is a
+//   code generator that automates dependency registration, reducing manual setup
+//
+// - Networking: dio
+// - Why: A powerful HTTP client that supports interceptors, request cancellation
+//   file downloads, and global configuration
+//
+// - Local Storage: hive
+// - Why: A lightweight, blazing-fast, and easy-to-use key-value database
+//   written in pure Dart. Ideal for caching data and user settings
+//
+// - Immutability / Code Generation: freezed
+// - Why: Generates immutable data classes, unions (for states), and handles
+//   copyWith, toJson/fromJson, significantly reducing boilerplate
+// 4. LINTING & STRUCTURE RULES
+// 4.1. File and Directory Naming Conventions
+// Enforce snake_case for all file names to maintain consistency
+file_naming_convention: snake_case
+
+// Enforce that feature directories contain data, domain, and presentation subdirectories
+// This ensures adherence to the Clean Architecture structure on a per-feature basis
+
+required_feature_subdirectories:
+
+- data
+- domain
+- presentation
+
+// 4.2. Code Style Rules
+// Set a maximum line length to improve code readability
+max_line_length: 80
+
+// Enforce that all use cases in the domain layer have a single public method named 'call'
+// This creates a consistent API for executing business logic
+use_case_public_method: call
+
+// 4.3. State Management Rules (Bloc vs. Cubit)
+// Guideline for choosing between Bloc and Cubit
+// - Use Cubit for simple state management (e.g., fetching data, toggling a switch)
+// - Use Bloc for complex state logic with distinct, traceable events (e.g., multi-step forms)
+
+state_management_guideline:
+
+  prefer_cubit_for_simple_state: true
+  prefer_bloc_for_complex_state: true
+
+// 4.4. Dependency Rules (The Dependency Inversion Principle)
+// Prevent the domain layer from importing from data or presentation layers
+// This is the core rule of Clean Architecture, keeping business logic pure
+
+disallowed_imports:
+
+- from: "package:flutter_app/features/*/domain/**"
+    to:
+  - "package:flutter_app/features/*/data/**"
+  - "package:flutter_app/features/*/presentation/**"
+  - "package:flutter/**"
+  - "package:flutter_bloc/**"
+// Prevent the data layer from importing from the presentation layer
+// The data layer should only be concerned with data sources, not UI
+- from: "package:flutter_app/features/*/data/**"
+    to:
+  - "package:flutter_app/features/*/presentation/**"
+
+// 4.5. Testing Rules
+// Require test files for all BLoCs, Cubits, and UseCases to ensure high test coverage
+// for business logic and state management
+
+require_tests_for:
+
+- "**/*_bloc.dart"
+- "**/*_cubit.dart"
+- "**/*_usecase.dart"
