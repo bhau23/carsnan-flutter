@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "768515730368",
+    "project_id": "carsnan-d262d",
+    "storage_bucket": "carsnan-d262d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:768515730368:android:632b175af281c84ad1f625",
+        "android_client_info": {
+          "package_name": "com.example.carsnan"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC8Lsc8ZDkmok-Ey92n5fXNUAvnJ7ouFos"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
