@@ -6,9 +6,7 @@ import 'package:carsnan/features/authentication/presentation/pages/email_authent
 import 'package:carsnan/features/authentication/presentation/pages/mfa_verification_page.dart';
 import 'package:carsnan/features/authentication/presentation/pages/otp_verification_page.dart';
 import 'package:carsnan/features/authentication/presentation/pages/phone_authentication_page.dart';
-import 'package:carsnan/features/home/presentation/pages/home_page.dart';
-import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:carsnan/features/dashboard/presentation/pages/dashboard_page.dart';
 import 'dart:async';
 
 class AppRouter {
@@ -21,7 +19,7 @@ class AppRouter {
       GoRoute(
         path: '/',
         builder: (BuildContext context, GoRouterState state) =>
-            const HomePage(),
+            const DashboardPage(),
       ),
       // Primary authentication route - now uses email/password
       GoRoute(
@@ -46,12 +44,6 @@ class AppRouter {
         path: '/otp',
         builder: (BuildContext context, GoRouterState state) =>
             const OtpVerificationPage(),
-      ),
-      GoRoute(
-        path: '/dashboard',
-        name: 'dashboard',
-        builder: (context, state) =>
-            const Scaffold(body: Center(child: Text('Dashboard Page'))),
       ),
     ],
     redirect: (BuildContext context, GoRouterState state) {
@@ -85,7 +77,7 @@ class AppRouter {
         return '/login';
       }
 
-      // If logged in and trying to access auth pages, redirect to home
+      // If logged in and trying to access auth pages, redirect to dashboard
       if (loggedIn && (loggingIn || inMfaFlow || usingPhoneAuth || inOtpFlow)) {
         return '/';
       }

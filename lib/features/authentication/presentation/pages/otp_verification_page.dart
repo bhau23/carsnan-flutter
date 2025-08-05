@@ -72,7 +72,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                     child: ElevatedButton(
                       onPressed: state.maybeWhen(
                         loading: () => null,
-                        orElse: () {
+                        orElse: () => () {
                           if (_formKey.currentState!.validate()) {
                             context.read<AuthBloc>().add(
                               VerifyOtp(otp: _otpController.text),

@@ -5,16 +5,12 @@ class ServiceCard extends StatelessWidget {
   final Service service;
   final VoidCallback onTap;
 
-  const ServiceCard({
-    super.key,
-    required this.service,
-    required this.onTap,
-  });
+  const ServiceCard({super.key, required this.service, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Card(
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -41,22 +37,18 @@ class ServiceCard extends StatelessWidget {
                           end: Alignment.bottomCenter,
                           colors: [
                             Colors.transparent,
-                            Colors.black.withOpacity(0.1),
+                            Colors.black.withValues(alpha: 0.1),
                           ],
                         ),
                       ),
                     ),
                   ),
                   // Price Tag in Bottom Right Corner
-                  Positioned(
-                    bottom: 8,
-                    right: 8,
-                    child: _buildPriceTag(),
-                  ),
+                  Positioned(bottom: 8, right: 8, child: _buildPriceTag()),
                 ],
               ),
             ),
-            
+
             // Text Content at Bottom
             Container(
               padding: const EdgeInsets.all(12),
@@ -66,7 +58,7 @@ class ServiceCard extends StatelessWidget {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    theme.colorScheme.surface.withOpacity(0.9),
+                    theme.colorScheme.surface.withValues(alpha: 0.9),
                     theme.colorScheme.surface,
                   ],
                 ),
@@ -86,12 +78,12 @@ class ServiceCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
-                  
+
                   // Service Description
                   Text(
                     service.description,
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurface.withOpacity(0.7),
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                       fontSize: 11,
                     ),
                     maxLines: 2,
@@ -122,8 +114,8 @@ class ServiceCard extends StatelessWidget {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                _getServiceColor(service.type).withOpacity(0.8),
-                _getServiceColor(service.type).withOpacity(0.6),
+                _getServiceColor(service.type).withValues(alpha: 0.8),
+                _getServiceColor(service.type).withValues(alpha: 0.6),
               ],
             ),
           ),
@@ -177,18 +169,18 @@ class ServiceCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFFD4AF37).withOpacity(0.3),
+            color: const Color(0xFFD4AF37).withValues(alpha: 0.3),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: Colors.black.withValues(alpha: 0.2),
             blurRadius: 4,
             offset: const Offset(0, 1),
           ),
         ],
         border: Border.all(
-          color: const Color(0xFFFFD700).withOpacity(0.8),
+          color: const Color(0xFFFFD700).withValues(alpha: 0.8),
           width: 1,
         ),
       ),

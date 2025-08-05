@@ -14,7 +14,7 @@ class TopActionBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Padding(
       padding: const EdgeInsets.all(AppSizes.mediumPadding),
       child: Row(
@@ -51,14 +51,14 @@ class TopActionBar extends StatelessWidget {
       borderRadius: BorderRadius.circular(AppSizes.mediumRadius),
       child: Container(
         padding: const EdgeInsets.symmetric(
-          horizontal: AppSizes.mediumPadding, 
+          horizontal: AppSizes.mediumPadding,
           vertical: AppSizes.mediumRadius,
         ),
         decoration: BoxDecoration(
           color: theme.colorScheme.surface,
           borderRadius: BorderRadius.circular(AppSizes.mediumRadius),
           border: Border.all(
-            color: theme.colorScheme.primary.withOpacity(0.3),
+            color: theme.colorScheme.primary.withValues(alpha: 0.3),
             width: 1,
           ),
         ),

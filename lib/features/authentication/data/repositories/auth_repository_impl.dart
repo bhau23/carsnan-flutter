@@ -25,7 +25,7 @@ class AuthRepositoryImpl implements AuthRepository {
         password,
       );
       return Right(userModel.toEntity());
-    } on firebase_auth.FirebaseAuthMultiFactorException catch (e) {
+    } on firebase_auth.FirebaseAuthMultiFactorException {
       // MFA required - let this exception bubble up to be handled in the presentation layer
       rethrow;
     } on firebase_auth.FirebaseAuthException catch (e) {

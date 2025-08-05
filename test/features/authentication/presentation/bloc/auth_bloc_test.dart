@@ -1,9 +1,13 @@
 import 'package:bloc_test/bloc_test.dart';
 import 'package:carsnan/core/errors/failures.dart';
 import 'package:carsnan/features/authentication/domain/entities/user.dart';
+import 'package:carsnan/features/authentication/domain/usecases/enroll_mfa_usecase.dart';
 import 'package:carsnan/features/authentication/domain/usecases/get_current_user_usecase.dart';
 import 'package:carsnan/features/authentication/domain/usecases/send_otp_usecase.dart';
+import 'package:carsnan/features/authentication/domain/usecases/sign_in_with_email_usecase.dart';
 import 'package:carsnan/features/authentication/domain/usecases/sign_out_usecase.dart';
+import 'package:carsnan/features/authentication/domain/usecases/sign_up_with_email_usecase.dart';
+import 'package:carsnan/features/authentication/domain/usecases/verify_mfa_usecase.dart';
 import 'package:carsnan/features/authentication/domain/usecases/verify_otp_usecase.dart';
 import 'package:carsnan/features/authentication/presentation/bloc/auth_bloc.dart';
 import 'package:carsnan/features/authentication/presentation/bloc/auth_event.dart';
@@ -20,24 +24,46 @@ class MockSignOutUseCase extends Mock implements SignOutUseCase {}
 
 class MockGetCurrentUserUseCase extends Mock implements GetCurrentUserUseCase {}
 
+class MockSignInWithEmailUseCase extends Mock
+    implements SignInWithEmailUseCase {}
+
+class MockSignUpWithEmailUseCase extends Mock
+    implements SignUpWithEmailUseCase {}
+
+class MockEnrollMfaUseCase extends Mock implements EnrollMfaUseCase {}
+
+class MockVerifyMfaUseCase extends Mock implements VerifyMfaUseCase {}
+
 void main() {
   late AuthBloc authBloc;
   late MockSendOtpUseCase mockSendOtpUseCase;
   late MockVerifyOtpUseCase mockVerifyOtpUseCase;
   late MockSignOutUseCase mockSignOutUseCase;
   late MockGetCurrentUserUseCase mockGetCurrentUserUseCase;
+  late MockSignInWithEmailUseCase mockSignInWithEmailUseCase;
+  late MockSignUpWithEmailUseCase mockSignUpWithEmailUseCase;
+  late MockEnrollMfaUseCase mockEnrollMfaUseCase;
+  late MockVerifyMfaUseCase mockVerifyMfaUseCase;
 
   setUp(() {
     mockSendOtpUseCase = MockSendOtpUseCase();
     mockVerifyOtpUseCase = MockVerifyOtpUseCase();
     mockSignOutUseCase = MockSignOutUseCase();
     mockGetCurrentUserUseCase = MockGetCurrentUserUseCase();
+    mockSignInWithEmailUseCase = MockSignInWithEmailUseCase();
+    mockSignUpWithEmailUseCase = MockSignUpWithEmailUseCase();
+    mockEnrollMfaUseCase = MockEnrollMfaUseCase();
+    mockVerifyMfaUseCase = MockVerifyMfaUseCase();
 
     authBloc = AuthBloc(
       mockSendOtpUseCase,
       mockVerifyOtpUseCase,
       mockSignOutUseCase,
       mockGetCurrentUserUseCase,
+      mockSignInWithEmailUseCase,
+      mockSignUpWithEmailUseCase,
+      mockEnrollMfaUseCase,
+      mockVerifyMfaUseCase,
     );
   });
 
