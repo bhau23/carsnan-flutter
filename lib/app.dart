@@ -21,23 +21,19 @@ class App extends StatelessWidget {
           create: (context) => ServiceLocalDataSourceImpl(),
         ),
         RepositoryProvider<ServiceRepositoryImpl>(
-          create: (context) => ServiceRepositoryImpl(
-            context.read<ServiceLocalDataSourceImpl>(),
-          ),
+          create: (context) =>
+              ServiceRepositoryImpl(context.read<ServiceLocalDataSourceImpl>()),
         ),
         RepositoryProvider<GetServicesUseCase>(
-          create: (context) => GetServicesUseCase(
-            context.read<ServiceRepositoryImpl>(),
-          ),
+          create: (context) =>
+              GetServicesUseCase(context.read<ServiceRepositoryImpl>()),
         ),
       ],
       child: BlocProvider(
         create: (context) => getIt<AuthBloc>()..add(const CheckAuthStatus()),
         child: Builder(
           builder: (context) {
-            final router = AppRouter(
-              authBloc: context.read<AuthBloc>(),
-            ).router;
+            final router = AppRouter(authBloc: context.read<AuthBloc>()).router;
             return MaterialApp.router(
               title: 'Carsnan',
               routeInformationProvider: router.routeInformationProvider,

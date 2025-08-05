@@ -1,5 +1,10 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+
+import 'app.dart';
+import 'core/di/injection.dart';
 import 'firebase_options.dart';
 import 'core/di/injection.dart';
 import 'app.dart';
