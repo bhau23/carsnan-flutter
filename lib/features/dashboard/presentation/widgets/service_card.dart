@@ -47,6 +47,12 @@ class ServiceCard extends StatelessWidget {
                       ),
                     ),
                   ),
+                  // Price Tag in Bottom Right Corner
+                  Positioned(
+                    bottom: 8,
+                    right: 8,
+                    child: _buildPriceTag(),
+                  ),
                 ],
               ),
             ),
@@ -153,5 +159,48 @@ class ServiceCard extends StatelessWidget {
       case ServiceType.luxury:
         return Icons.diamond;
     }
+  }
+
+  Widget _buildPriceTag() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFFFFD700), // Gold
+            Color(0xFFD4AF37), // Darker Gold
+            Color(0xFFB8860B), // Dark Gold
+          ],
+        ),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFFD4AF37).withOpacity(0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 4,
+            offset: const Offset(0, 1),
+          ),
+        ],
+        border: Border.all(
+          color: const Color(0xFFFFD700).withOpacity(0.8),
+          width: 1,
+        ),
+      ),
+      child: Text(
+        '\$${service.price.toStringAsFixed(0)}',
+        style: const TextStyle(
+          color: Colors.black87,
+          fontSize: 12,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 0.5,
+        ),
+      ),
+    );
   }
 }
