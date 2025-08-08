@@ -5,6 +5,12 @@ import '../cubit/dashboard_state.dart';
 import '../widgets/top_action_bar.dart';
 import '../widgets/service_card.dart';
 import '../widgets/bottom_nav_bar.dart';
+import 'service_details_page.dart';
+import '../../../profile/presentation/pages/profile_page.dart';
+import '../../../profile/data/datasources/profile_local_datasource.dart';
+import '../../../profile/data/repositories/profile_repository_impl.dart';
+import '../../../profile/domain/usecases/get_user_profile_usecase.dart';
+import '../../../profile/domain/usecases/update_user_profile_usecase.dart';
 
 class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});
@@ -29,12 +35,16 @@ class DashboardView extends StatelessWidget {
     
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'CarsNan',
-          style: theme.textTheme.headlineMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: theme.colorScheme.primary,
-          ),
+        title: BlocBuilder<DashboardCubit, DashboardState>(
+          builder: (context, state) {
+            return Text(
+              _getAppBarTitle(state.selectedBottomNavIndex),
+              style: theme.textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: theme.colorScheme.primary,
+              ),
+            );
+          },
         ),
         centerTitle: true,
         backgroundColor: Colors.transparent,
@@ -42,15 +52,12 @@ class DashboardView extends StatelessWidget {
       ),
       body: BlocBuilder<DashboardCubit, DashboardState>(
         builder: (context, state) {
-          return Column(
+          return IndexedStack(
+            index: state.selectedBottomNavIndex,
             children: [
-              TopActionBar(
-                onAddAddress: () => context.read<DashboardCubit>().navigateToAddAddress(),
-                onAddVehicle: () => context.read<DashboardCubit>().navigateToAddVehicle(),
-              ),
-              Expanded(
-                child: _buildBody(context, state, theme),
-              ),
+              _buildHomePage(context, state, theme),
+              _buildOrdersPage(context, theme),
+              _buildProfilePage(context),
             ],
           );
         },
@@ -66,7 +73,87 @@ class DashboardView extends StatelessWidget {
     );
   }
 
-  Widget _buildBody(BuildContext context, DashboardState state, ThemeData theme) {
+  String _getAppBarTitle(int index) {
+    switch (index) {
+      case 0:
+        return 'CarsNan';
+      case 1:
+        return 'My Orders';
+      case 2:
+        return 'My Profile';
+      default:
+        return 'CarsNan';
+    }
+  }
+
+  Widget _buildHomePage(BuildContext context, DashboardState state, ThemeData theme) {
+    return Column(
+      children: [
+        TopActionBar(
+          onAddAddress: () => context.read<DashboardCubit>().navigateToAddAddress(),
+          onAddVehicle: () => context.read<DashboardCubit>().navigateToAddVehicle(),
+        ),
+        Expanded(child: _buildHomeBody(context, state, theme)),
+      ],
+    );
+  }
+
+  Widget _buildOrdersPage(BuildContext context, ThemeData theme) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.shopping_bag_outlined,
+            size: 80,
+            color: theme.colorScheme.outline,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'No orders yet',
+            style: theme.textTheme.headlineSmall?.copyWith(
+              color: theme.colorScheme.outline,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Your order history will appear here',
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: theme.colorScheme.outline,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProfilePage(BuildContext context) {
+    return MultiRepositoryProvider(
+      providers: [
+        RepositoryProvider<ProfileLocalDataSourceImpl>(
+          create: (context) => ProfileLocalDataSourceImpl(),
+        ),
+        RepositoryProvider<ProfileRepositoryImpl>(
+          create: (context) => ProfileRepositoryImpl(
+            context.read<ProfileLocalDataSourceImpl>(),
+          ),
+        ),
+        RepositoryProvider<GetUserProfileUseCase>(
+          create: (context) => GetUserProfileUseCase(
+            context.read<ProfileRepositoryImpl>(),
+          ),
+        ),
+        RepositoryProvider<UpdateUserProfileUseCase>(
+          create: (context) => UpdateUserProfileUseCase(
+            context.read<ProfileRepositoryImpl>(),
+          ),
+        ),
+      ],
+      child: const ProfilePage(userId: 'current_user'),
+    );
+  }
+
+  Widget _buildHomeBody(BuildContext context, DashboardState state, ThemeData theme) {
     if (state.isLoading) {
       return Center(
         child: CircularProgressIndicator(
@@ -146,7 +233,10 @@ class DashboardView extends StatelessWidget {
                 final service = state.services[index];
                 return ServiceCard(
                   service: service,
-                  onTap: () => context.read<DashboardCubit>().selectService(service.id),
+                  onTap: () {
+                    context.read<DashboardCubit>().selectService(service.id);
+                    ServiceDetailsPage.show(context, service);
+                  },
                 );
               },
               childCount: state.services.length,

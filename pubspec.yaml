@@ -82,6 +82,12 @@ flutter:
   assets:
     - assets/images/
     - assets/images/services/
+    - assets/images/services/banners/
+    - assets/images/services/banners/general/
+    - assets/images/services/banners/premium/
+    - assets/images/services/banners/luxury/
+    - assets/images/service_items/
+    - assets/images/service_items/shared/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
