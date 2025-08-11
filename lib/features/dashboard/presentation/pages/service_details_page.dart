@@ -5,10 +5,7 @@ import '../widgets/service_item_card.dart';
 class ServiceDetailsPage extends StatefulWidget {
   final Service service;
 
-  const ServiceDetailsPage({
-    super.key,
-    required this.service,
-  });
+  const ServiceDetailsPage({super.key, required this.service});
 
   static void show(BuildContext context, Service service) {
     showModalBottomSheet(
@@ -26,7 +23,7 @@ class ServiceDetailsPage extends StatefulWidget {
 class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
   late PageController _pageController;
   int _currentImageIndex = 0;
-  
+
   // Multiple banner images for each service
   List<String> get _bannerImages {
     switch (widget.service.type) {
@@ -50,13 +47,13 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
         ];
     }
   }
-  
+
   @override
   void initState() {
     super.initState();
     _pageController = PageController();
   }
-  
+
   @override
   void dispose() {
     _pageController.dispose();
@@ -67,17 +64,15 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final screenHeight = MediaQuery.of(context).size.height;
-    
+
     return Stack(
       children: [
         // Background overlay
         GestureDetector(
           onTap: () => Navigator.of(context).pop(),
-          child: Container(
-            color: Colors.black.withOpacity(0.5),
-          ),
+          child: Container(color: Colors.black.withValues(alpha: 0.5)),
         ),
-        
+
         // Modal content
         Align(
           alignment: Alignment.bottomCenter,
@@ -98,11 +93,13 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.onSurfaceVariant.withOpacity(0.4),
+                    color: theme.colorScheme.onSurfaceVariant.withValues(
+                      alpha: 0.4,
+                    ),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
-                
+
                 // Scrollable content
                 Expanded(
                   child: CustomScrollView(
@@ -111,17 +108,17 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                       SliverToBoxAdapter(
                         child: _buildServiceBanner(context, theme),
                       ),
-                      
+
                       // Service details
                       SliverToBoxAdapter(
                         child: _buildServiceDetails(context, theme),
                       ),
-                      
+
                       // What's included section
                       SliverToBoxAdapter(
                         child: _buildWhatsIncludedSection(context, theme),
                       ),
-                      
+
                       // Bottom padding to account for fixed bottom bar
                       const SliverPadding(
                         padding: EdgeInsets.only(bottom: 100),
@@ -129,7 +126,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                     ],
                   ),
                 ),
-                
+
                 // Fixed bottom action bar
                 _buildBottomActionBar(context, theme),
               ],
@@ -178,8 +175,12 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                           colors: [
-                            _getServiceColor(widget.service.type).withOpacity(0.8),
-                            _getServiceColor(widget.service.type).withOpacity(0.6),
+                            _getServiceColor(
+                              widget.service.type,
+                            ).withValues(alpha: 0.8),
+                            _getServiceColor(
+                              widget.service.type,
+                            ).withValues(alpha: 0.6),
                           ],
                         ),
                       ),
@@ -209,7 +210,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                 );
               },
             ),
-            
+
             // Gradient overlay
             Container(
               decoration: BoxDecoration(
@@ -218,20 +219,23 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                   end: Alignment.bottomCenter,
                   colors: [
                     Colors.transparent,
-                    Colors.black.withOpacity(0.3),
+                    Colors.black.withValues(alpha: 0.3),
                   ],
                 ),
               ),
             ),
-            
+
             // Highlight feature banner
             Positioned(
               top: 20,
               left: 20,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.7),
+                  color: Colors.black.withValues(alpha: 0.7),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
@@ -244,7 +248,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                 ),
               ),
             ),
-            
+
             // Dot indicators
             Positioned(
               bottom: 15,
@@ -261,13 +265,13 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                       shape: BoxShape.circle,
                       color: _currentImageIndex == entry.key
                           ? Colors.white
-                          : Colors.white.withOpacity(0.4),
+                          : Colors.white.withValues(alpha: 0.4),
                     ),
                   );
                 }).toList(),
               ),
             ),
-            
+
             // Left tap area for previous image (ON TOP)
             Positioned(
               left: 0,
@@ -284,7 +288,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                     child: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.5),
+                        color: Colors.black.withValues(alpha: 0.5),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
@@ -297,7 +301,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                 ),
               ),
             ),
-            
+
             // Right tap area for next image (ON TOP)
             Positioned(
               right: 0,
@@ -314,7 +318,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                     child: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.5),
+                        color: Colors.black.withValues(alpha: 0.5),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
@@ -380,13 +384,16 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
             ),
           ),
           const SizedBox(height: 12),
-          
+
           // Price and duration row
           Row(
             children: [
               // Price
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: theme.colorScheme.primaryContainer,
                   borderRadius: BorderRadius.circular(20),
@@ -400,7 +407,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                 ),
               ),
               const SizedBox(width: 16),
-              
+
               // Duration
               Row(
                 children: [
@@ -422,7 +429,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
             ],
           ),
           const SizedBox(height: 16),
-          
+
           // Service description
           Text(
             widget.service.description,
@@ -450,7 +457,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
             ),
           ),
           const SizedBox(height: 16),
-          
+
           // Horizontally scrollable service items
           SizedBox(
             height: 120,
@@ -480,7 +487,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
         color: theme.colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, -5),
           ),
@@ -512,9 +519,9 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                 ],
               ),
             ),
-            
+
             const SizedBox(width: 16),
-            
+
             // Right side - Book now button
             Expanded(
               flex: 3,
@@ -539,10 +546,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                 ),
                 child: const Text(
                   'Book Now',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               ),
             ),

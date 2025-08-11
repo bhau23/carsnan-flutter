@@ -22,7 +22,7 @@ class ProfileActionsSection extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
           side: BorderSide(
-            color: const Color(0xFFD4AF37).withOpacity(0.2),
+            color: const Color(0xFFD4AF37).withValues(alpha: 0.2),
             width: 1,
           ),
         ),
@@ -34,7 +34,7 @@ class ProfileActionsSection extends StatelessWidget {
               end: Alignment.bottomRight,
               colors: [
                 theme.colorScheme.surface,
-                theme.colorScheme.surface.withOpacity(0.8),
+                theme.colorScheme.surface.withValues(alpha: 0.8),
               ],
             ),
           ),
@@ -59,7 +59,7 @@ class ProfileActionsSection extends StatelessWidget {
                         borderRadius: BorderRadius.circular(12),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFFD4AF37).withOpacity(0.3),
+                            color: const Color(0xFFD4AF37).withValues(alpha: 0.3),
                             blurRadius: 8,
                             offset: const Offset(0, 2),
                           ),
@@ -137,3 +137,4 @@ class ProfileActionsSection extends StatelessWidget {
     );
   }
 }
+

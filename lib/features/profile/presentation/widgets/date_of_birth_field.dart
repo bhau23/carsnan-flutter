@@ -24,7 +24,7 @@ class DateOfBirthField extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
           side: BorderSide(
-            color: const Color(0xFFD4AF37).withOpacity(0.2),
+            color: const Color(0xFFD4AF37).withValues(alpha: 0.2),
             width: 1,
           ),
         ),
@@ -36,7 +36,7 @@ class DateOfBirthField extends StatelessWidget {
               end: Alignment.bottomRight,
               colors: [
                 theme.colorScheme.surface,
-                theme.colorScheme.surface.withOpacity(0.8),
+                theme.colorScheme.surface.withValues(alpha: 0.8),
               ],
             ),
           ),
@@ -53,15 +53,14 @@ class DateOfBirthField extends StatelessWidget {
                         gradient: const LinearGradient(
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
-                          colors: [
-                            Color(0xFFD4AF37),
-                            Color(0xFFFFD700),
-                          ],
+                          colors: [Color(0xFFD4AF37), Color(0xFFFFD700)],
                         ),
                         borderRadius: BorderRadius.circular(12),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFFD4AF37).withOpacity(0.3),
+                            color: const Color(
+                              0xFFD4AF37,
+                            ).withValues(alpha: 0.3),
                             blurRadius: 8,
                             offset: const Offset(0, 2),
                           ),
@@ -91,10 +90,12 @@ class DateOfBirthField extends StatelessWidget {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFD4AF37).withOpacity(0.1),
+                          color: const Color(0xFFD4AF37).withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(6),
                           border: Border.all(
-                            color: const Color(0xFFD4AF37).withOpacity(0.3),
+                            color: const Color(
+                              0xFFD4AF37,
+                            ).withValues(alpha: 0.3),
                           ),
                         ),
                         child: Text(
@@ -122,7 +123,7 @@ class DateOfBirthField extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         border: Border.all(
-                          color: const Color(0xFFD4AF37).withOpacity(0.3),
+                          color: const Color(0xFFD4AF37).withValues(alpha: 0.3),
                         ),
                         borderRadius: BorderRadius.circular(12),
                         color: theme.colorScheme.surface,
@@ -138,7 +139,9 @@ class DateOfBirthField extends StatelessWidget {
                                 fontWeight: FontWeight.w500,
                                 color: dateOfBirth != null
                                     ? theme.colorScheme.onSurface
-                                    : theme.colorScheme.onSurface.withOpacity(0.6),
+                                    : theme.colorScheme.onSurface.withValues(
+                                        alpha: 0.6,
+                                      ),
                               ),
                             ),
                           ),
@@ -159,10 +162,10 @@ class DateOfBirthField extends StatelessWidget {
                       vertical: 16,
                     ),
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.surface.withOpacity(0.3),
+                      color: theme.colorScheme.surface.withValues(alpha: 0.3),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: const Color(0xFFD4AF37).withOpacity(0.1),
+                        color: const Color(0xFFD4AF37).withValues(alpha: 0.1),
                       ),
                     ),
                     child: Text(
@@ -172,7 +175,9 @@ class DateOfBirthField extends StatelessWidget {
                       style: theme.textTheme.bodyLarge?.copyWith(
                         color: dateOfBirth != null
                             ? theme.colorScheme.onSurface
-                            : theme.colorScheme.onSurface.withOpacity(0.6),
+                            : theme.colorScheme.onSurface.withValues(
+                                alpha: 0.6,
+                              ),
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -189,7 +194,9 @@ class DateOfBirthField extends StatelessWidget {
   Future<void> _showDatePicker(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: dateOfBirth ?? DateTime.now().subtract(const Duration(days: 365 * 25)),
+      initialDate:
+          dateOfBirth ??
+          DateTime.now().subtract(const Duration(days: 365 * 25)),
       firstDate: DateTime(1900),
       lastDate: DateTime.now(),
       builder: (context, child) {
@@ -212,8 +219,18 @@ class DateOfBirthField extends StatelessWidget {
 
   String _formatDate(DateTime date) {
     const List<String> months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     return '${date.day} ${months[date.month - 1]} ${date.year}';
   }

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/constants/auth_config.dart';
@@ -206,9 +207,11 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<void> sendOtp(String phoneNumber) async {
     // Debug: Print test number configuration
     AuthConfig.debugPrintTestNumbers();
-    print('=== DEBUG: Sending OTP ===');
-    print('Phone number: $phoneNumber');
-    print('Is test number: ${AuthConfig.isTestNumber(phoneNumber)}');
+    if (kDebugMode) {
+      debugPrint('=== DEBUG: Sending OTP ===');
+      debugPrint('Phone number: $phoneNumber');
+      debugPrint('Is test number: ${AuthConfig.isTestNumber(phoneNumber)}');
+    }
 
     // Check if this is a test phone number
     if (AuthConfig.isTestNumber(phoneNumber)) {
@@ -230,14 +233,18 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
                 }
               },
           verificationFailed: (firebase_auth.FirebaseAuthException e) {
-            print('Test verification failed: ${e.message}');
+            if (kDebugMode) {
+              debugPrint('Test verification failed: ${e.message}');
+            }
             completer.completeError(e);
           },
           codeSent: (String verificationId, int? resendToken) {
             _verificationId = verificationId;
             // Also store in static map for persistence
             _testVerificationStorage[phoneNumber] = verificationId;
-            print('Test verification ID received: $verificationId');
+            if (kDebugMode) {
+              debugPrint('Test verification ID received: $verificationId');
+            }
             completer.complete();
           },
           codeAutoRetrievalTimeout: (String verificationId) {
@@ -249,13 +256,19 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         await completer.future;
         return;
       } catch (e) {
-        print('Firebase test verification failed: $e');
+        if (kDebugMode) {
+          debugPrint('Firebase test verification failed: $e');
+        }
         // Fallback to mock verification for test numbers
         final testVerificationId =
             'mock_test_verification_${DateTime.now().millisecondsSinceEpoch}';
         _verificationId = testVerificationId;
         _testVerificationStorage[phoneNumber] = testVerificationId;
-        print('Using mock verification for test number: $testVerificationId');
+        if (kDebugMode) {
+          debugPrint(
+            'Using mock verification for test number: $testVerificationId',
+          );
+        }
         return;
       }
     }
@@ -280,12 +293,16 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
               }
             },
         verificationFailed: (firebase_auth.FirebaseAuthException e) {
-          print('Verification failed: ${e.message}');
+          if (kDebugMode) {
+            debugPrint('Verification failed: ${e.message}');
+          }
           completer.completeError(e);
         },
         codeSent: (String verificationId, int? resendToken) {
           _verificationId = verificationId;
-          print('Real verification ID received: $verificationId');
+          if (kDebugMode) {
+            debugPrint('Real verification ID received: $verificationId');
+          }
           completer.complete();
         },
         codeAutoRetrievalTimeout: (String verificationId) {
@@ -295,7 +312,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
       await completer.future;
     } catch (e) {
-      print('Error in sendOtp: $e');
+      if (kDebugMode) {
+        debugPrint('Error in sendOtp: $e');
+      }
       completer.completeError(e);
       rethrow;
     }
@@ -303,10 +322,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<UserModel> verifyOtp(String otp) async {
-    print('=== DEBUG: Verifying OTP ===');
-    print('OTP entered: $otp');
-    print('Current verification ID: $_verificationId');
-    print('Test verification storage: $_testVerificationStorage');
+    if (kDebugMode) {
+      debugPrint('=== DEBUG: Verifying OTP ===');
+      debugPrint('OTP entered: $otp');
+      debugPrint('Current verification ID: $_verificationId');
+      debugPrint('Test verification storage: $_testVerificationStorage');
+    }
 
     // Try to recover verification ID if missing but we have test storage
     if (_verificationId == null) {
@@ -315,14 +336,20 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       for (final phoneNumber in testPhoneNumbers) {
         if (_testVerificationStorage.containsKey(phoneNumber)) {
           _verificationId = _testVerificationStorage[phoneNumber];
-          print('Recovered verification ID from storage: $_verificationId');
+          if (kDebugMode) {
+            debugPrint(
+              'Recovered verification ID from storage: $_verificationId',
+            );
+          }
           break;
         }
       }
     }
 
     if (_verificationId == null) {
-      print('ERROR: No verification ID found');
+      if (kDebugMode) {
+        debugPrint('ERROR: No verification ID found');
+      }
       throw firebase_auth.FirebaseAuthException(
         code: 'invalid-verification-id',
         message: 'No verification ID found. Please send OTP first.',
@@ -335,17 +362,21 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     );
     final isFirebaseTestVerification = !isMockTestVerification;
 
-    print('Is mock test verification: $isMockTestVerification');
-    print('Is Firebase test verification: $isFirebaseTestVerification');
+    if (kDebugMode) {
+      debugPrint('Is mock test verification: $isMockTestVerification');
+      debugPrint('Is Firebase test verification: $isFirebaseTestVerification');
+    }
 
     if (isMockTestVerification) {
       // Handle mock test verification (when Firebase test auth fails)
       final isValidTestOtp = AuthConfig.testPhoneNumbers.values.contains(otp);
 
-      print('Valid test OTP: $isValidTestOtp');
-      print(
-        'Expected test codes: ${AuthConfig.testPhoneNumbers.values.toList()}',
-      );
+      if (kDebugMode) {
+        debugPrint('Valid test OTP: $isValidTestOtp');
+        debugPrint(
+          'Expected test codes: ${AuthConfig.testPhoneNumbers.values.toList()}',
+        );
+      }
 
       if (!isValidTestOtp) {
         throw firebase_auth.FirebaseAuthException(
@@ -377,7 +408,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
               'test${usedTestPhone.replaceAll('+', '').replaceAll(' ', '')}@test.com';
           final testPassword = 'testpassword123';
 
-          print('Creating test email account: $testEmail');
+          if (kDebugMode) {
+            debugPrint('Creating test email account: $testEmail');
+          }
 
           try {
             // Try to sign in first
@@ -389,7 +422,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
             return UserModel.fromFirebaseUser(signInCredential.user!);
           } catch (signInError) {
             // If sign in fails, create the account
-            print('Test account does not exist, creating new one');
+            if (kDebugMode) {
+              debugPrint('Test account does not exist, creating new one');
+            }
             final signUpCredential = await _firebaseAuth
                 .createUserWithEmailAndPassword(
                   email: testEmail,
@@ -399,7 +434,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           }
         }
       } catch (e) {
-        print('Error with test email authentication: $e');
+        if (kDebugMode) {
+          debugPrint('Error with test email authentication: $e');
+        }
       }
 
       // Fallback: provide clear instruction
@@ -411,7 +448,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     }
 
     // Normal verification for real phone numbers and Firebase test numbers
-    print('Proceeding with Firebase phone verification');
+    if (kDebugMode) {
+      debugPrint('Proceeding with Firebase phone verification');
+    }
     final credential = firebase_auth.PhoneAuthProvider.credential(
       verificationId: _verificationId!,
       smsCode: otp,
@@ -430,7 +469,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         );
       }
 
-      print('Phone verification successful');
+      if (kDebugMode) {
+        debugPrint('Phone verification successful');
+      }
       return UserModel.fromFirebaseUser(user);
     } finally {
       // Clear verification ID after use

@@ -31,7 +31,7 @@ class GenderField extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
           side: BorderSide(
-            color: const Color(0xFFD4AF37).withOpacity(0.2),
+            color: const Color(0xFFD4AF37).withValues(alpha: 0.2),
             width: 1,
           ),
         ),
@@ -43,7 +43,7 @@ class GenderField extends StatelessWidget {
               end: Alignment.bottomRight,
               colors: [
                 theme.colorScheme.surface,
-                theme.colorScheme.surface.withOpacity(0.8),
+                theme.colorScheme.surface.withValues(alpha: 0.8),
               ],
             ),
           ),
@@ -68,7 +68,7 @@ class GenderField extends StatelessWidget {
                         borderRadius: BorderRadius.circular(12),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFFD4AF37).withOpacity(0.3),
+                            color: const Color(0xFFD4AF37).withValues(alpha: 0.3),
                             blurRadius: 8,
                             offset: const Offset(0, 2),
                           ),
@@ -98,10 +98,10 @@ class GenderField extends StatelessWidget {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFD4AF37).withOpacity(0.1),
+                          color: const Color(0xFFD4AF37).withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(6),
                           border: Border.all(
-                            color: const Color(0xFFD4AF37).withOpacity(0.3),
+                            color: const Color(0xFFD4AF37).withValues(alpha: 0.3),
                           ),
                         ),
                         child: Text(
@@ -124,7 +124,7 @@ class GenderField extends StatelessWidget {
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide(
-                          color: theme.colorScheme.outline.withOpacity(0.3),
+                          color: theme.colorScheme.outline.withValues(alpha: 0.3),
                         ),
                       ),
                       focusedBorder: OutlineInputBorder(
@@ -137,7 +137,7 @@ class GenderField extends StatelessWidget {
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide(
-                          color: theme.colorScheme.outline.withOpacity(0.2),
+                          color: theme.colorScheme.outline.withValues(alpha: 0.2),
                         ),
                       ),
                       contentPadding: const EdgeInsets.symmetric(
@@ -148,7 +148,7 @@ class GenderField extends StatelessWidget {
                       fillColor: theme.colorScheme.surface,
                       hintText: 'Select gender',
                       hintStyle: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onSurface.withOpacity(0.5),
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                       ),
                     ),
                     dropdownColor: theme.colorScheme.surface,
@@ -181,10 +181,10 @@ class GenderField extends StatelessWidget {
                       vertical: 16,
                     ),
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.surface.withOpacity(0.3),
+                      color: theme.colorScheme.surface.withValues(alpha: 0.3),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: const Color(0xFFD4AF37).withOpacity(0.1),
+                        color: const Color(0xFFD4AF37).withValues(alpha: 0.1),
                       ),
                     ),
                     child: Text(
@@ -192,7 +192,7 @@ class GenderField extends StatelessWidget {
                       style: theme.textTheme.bodyLarge?.copyWith(
                         color: gender != null
                             ? theme.colorScheme.onSurface
-                            : theme.colorScheme.onSurface.withOpacity(0.6),
+                            : theme.colorScheme.onSurface.withValues(alpha: 0.6),
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -206,3 +206,4 @@ class GenderField extends StatelessWidget {
     );
   }
 }
+

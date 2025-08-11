@@ -62,7 +62,7 @@ class ServiceItemCard extends StatelessWidget {
         color: theme.colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: _getServiceColor(serviceType).withOpacity(0.2),
+          color: _getServiceColor(serviceType).withValues(alpha: 0.2),
           width: 1,
         ),
       ),
@@ -95,8 +95,8 @@ class ServiceItemCard extends StatelessWidget {
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                           colors: [
-                            _getServiceColor(serviceType).withOpacity(0.3),
-                            _getServiceColor(serviceType).withOpacity(0.1),
+                            _getServiceColor(serviceType).withValues(alpha: 0.3),
+                            _getServiceColor(serviceType).withValues(alpha: 0.1),
                           ],
                         ),
                       ),
@@ -172,3 +172,4 @@ class ServiceItemCard extends StatelessWidget {
     }
   }
 }
+
