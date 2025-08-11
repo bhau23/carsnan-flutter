@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 /// Configuration for Firebase Authentication
 class AuthConfig {
   // Test phone numbers for development/testing
@@ -31,10 +33,12 @@ class AuthConfig {
 
   /// Debug method to show all configured test numbers
   static void debugPrintTestNumbers() {
-    print('=== DEBUG: Configured Test Numbers ===');
-    testPhoneNumbers.forEach((phone, code) {
-      print('Phone: $phone -> Code: $code');
-    });
-    print('=====================================');
+    if (kDebugMode) {
+      debugPrint('=== DEBUG: Configured Test Numbers ===');
+      testPhoneNumbers.forEach((phone, code) {
+        debugPrint('Phone: $phone -> Code: $code');
+      });
+      debugPrint('=====================================');
+    }
   }
 }

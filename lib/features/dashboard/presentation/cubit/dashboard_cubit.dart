@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/usecases/get_services_usecase.dart';
+import '../../domain/entities/service.dart';
 import 'dashboard_state.dart';
 
 class DashboardCubit extends Cubit<DashboardState> {
@@ -33,6 +34,14 @@ class DashboardCubit extends Cubit<DashboardState> {
   }
 
   void selectService(String serviceId) {
-    // TODO: Implement service selection logic
+    emit(state.copyWith(selectedServiceId: serviceId));
+  }
+
+  Service? getServiceById(String serviceId) {
+    try {
+      return state.services.firstWhere((service) => service.id == serviceId);
+    } catch (e) {
+      return null;
+    }
   }
 }

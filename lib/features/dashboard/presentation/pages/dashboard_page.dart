@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:carsnan/features/authentication/presentation/bloc/auth_bloc.dart';
-import 'package:carsnan/features/authentication/presentation/bloc/auth_event.dart';
-import 'package:carsnan/features/authentication/presentation/bloc/auth_state.dart';
 import '../cubit/dashboard_cubit.dart';
 import '../cubit/dashboard_state.dart';
 import '../widgets/top_action_bar.dart';
 import '../widgets/service_card.dart';
 import '../widgets/bottom_nav_bar.dart';
+import 'service_details_page.dart';
+import '../../../profile/presentation/pages/profile_page.dart';
+import '../../../profile/data/datasources/profile_local_datasource.dart';
+import '../../../profile/data/repositories/profile_repository_impl.dart';
+import '../../../profile/domain/usecases/get_user_profile_usecase.dart';
+import '../../../profile/domain/usecases/update_user_profile_usecase.dart';
 
 class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});
@@ -31,105 +34,32 @@ class DashboardView extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'CarsNan',
-          style: theme.textTheme.headlineMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: theme.colorScheme.primary,
-          ),
+        title: BlocBuilder<DashboardCubit, DashboardState>(
+          builder: (context, state) {
+            return Text(
+              _getAppBarTitle(state.selectedBottomNavIndex),
+              style: theme.textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: theme.colorScheme.primary,
+              ),
+            );
+          },
         ),
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
-        actions: [
-          BlocBuilder<AuthBloc, AuthState>(
-            builder: (context, authState) {
-              return authState.maybeWhen(
-                authenticated: (user) => PopupMenuButton<String>(
-                  icon: Icon(
-                    Icons.account_circle,
-                    color: theme.colorScheme.primary,
-                  ),
-                  onSelected: (value) {
-                    if (value == 'logout') {
-                      _showLogoutDialog(context);
-                    }
-                  },
-                  itemBuilder: (BuildContext context) => [
-                    PopupMenuItem<String>(
-                      value: 'user_info',
-                      enabled: false,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            user.displayName ?? 'User',
-                            style: theme.textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Text(
-                            user.email ?? user.phoneNumber,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.7),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const PopupMenuDivider(),
-                    PopupMenuItem<String>(
-                      value: 'logout',
-                      child: Row(
-                        children: [
-                          Icon(Icons.logout, color: theme.colorScheme.error),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Logout',
-                            style: TextStyle(color: theme.colorScheme.error),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                orElse: () => const SizedBox.shrink(),
-              );
-            },
-          ),
-        ],
       ),
-      body: BlocListener<AuthBloc, AuthState>(
-        listener: (context, authState) {
-          authState.maybeWhen(
-            unauthenticated: () {
-              // Navigation will be handled by the router redirect
-            },
-            error: (message) => ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(message),
-                backgroundColor: theme.colorScheme.error,
-              ),
-            ),
-            orElse: () {},
+      body: BlocBuilder<DashboardCubit, DashboardState>(
+        builder: (context, state) {
+          return IndexedStack(
+            index: state.selectedBottomNavIndex,
+            children: [
+              _buildHomePage(context, state, theme),
+              _buildOrdersPage(context, theme),
+              _buildProfilePage(context),
+            ],
           );
         },
-        child: BlocBuilder<DashboardCubit, DashboardState>(
-          builder: (context, state) {
-            return Column(
-              children: [
-                TopActionBar(
-                  onAddAddress: () =>
-                      context.read<DashboardCubit>().navigateToAddAddress(),
-                  onAddVehicle: () =>
-                      context.read<DashboardCubit>().navigateToAddVehicle(),
-                ),
-                Expanded(child: _buildBody(context, state, theme)),
-              ],
-            );
-          },
-        ),
       ),
       bottomNavigationBar: BlocBuilder<DashboardCubit, DashboardState>(
         builder: (context, state) {
@@ -143,51 +73,90 @@ class DashboardView extends StatelessWidget {
     );
   }
 
-  void _showLogoutDialog(BuildContext context) {
-    final theme = Theme.of(context);
-    
-    showDialog<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Logout'),
-          content: const Text('Are you sure you want to logout?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
-            ),
-            BlocBuilder<AuthBloc, AuthState>(
-              builder: (context, authState) {
-                return TextButton(
-                  onPressed: authState.maybeWhen(
-                    loading: () => null,
-                    orElse: () => () {
-                      context.read<AuthBloc>().add(const SignOut());
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                  style: TextButton.styleFrom(
-                    foregroundColor: theme.colorScheme.error,
-                  ),
-                  child: authState.maybeWhen(
-                    loading: () => const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
-                    orElse: () => const Text('Logout'),
-                  ),
-                );
-              },
-            ),
-          ],
-        );
-      },
+  String _getAppBarTitle(int index) {
+    switch (index) {
+      case 0:
+        return 'CarsNan';
+      case 1:
+        return 'My Orders';
+      case 2:
+        return 'My Profile';
+      default:
+        return 'CarsNan';
+    }
+  }
+
+  Widget _buildHomePage(
+    BuildContext context,
+    DashboardState state,
+    ThemeData theme,
+  ) {
+    return Column(
+      children: [
+        TopActionBar(
+          onAddAddress: () =>
+              context.read<DashboardCubit>().navigateToAddAddress(),
+          onAddVehicle: () =>
+              context.read<DashboardCubit>().navigateToAddVehicle(),
+        ),
+        Expanded(child: _buildHomeBody(context, state, theme)),
+      ],
     );
   }
 
-  Widget _buildBody(
+  Widget _buildOrdersPage(BuildContext context, ThemeData theme) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.shopping_bag_outlined,
+            size: 80,
+            color: theme.colorScheme.outline,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'No orders yet',
+            style: theme.textTheme.headlineSmall?.copyWith(
+              color: theme.colorScheme.outline,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Your order history will appear here',
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: theme.colorScheme.outline,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProfilePage(BuildContext context) {
+    return MultiRepositoryProvider(
+      providers: [
+        RepositoryProvider<ProfileLocalDataSourceImpl>(
+          create: (context) => ProfileLocalDataSourceImpl(),
+        ),
+        RepositoryProvider<ProfileRepositoryImpl>(
+          create: (context) =>
+              ProfileRepositoryImpl(context.read<ProfileLocalDataSourceImpl>()),
+        ),
+        RepositoryProvider<GetUserProfileUseCase>(
+          create: (context) =>
+              GetUserProfileUseCase(context.read<ProfileRepositoryImpl>()),
+        ),
+        RepositoryProvider<UpdateUserProfileUseCase>(
+          create: (context) =>
+              UpdateUserProfileUseCase(context.read<ProfileRepositoryImpl>()),
+        ),
+      ],
+      child: const ProfilePage(userId: 'current_user'),
+    );
+  }
+
+  Widget _buildHomeBody(
     BuildContext context,
     DashboardState state,
     ThemeData theme,
@@ -263,8 +232,10 @@ class DashboardView extends StatelessWidget {
               final service = state.services[index];
               return ServiceCard(
                 service: service,
-                onTap: () =>
-                    context.read<DashboardCubit>().selectService(service.id),
+                onTap: () {
+                  context.read<DashboardCubit>().selectService(service.id);
+                  ServiceDetailsPage.show(context, service);
+                },
               );
             }, childCount: state.services.length),
           ),
