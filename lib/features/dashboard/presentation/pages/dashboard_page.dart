@@ -89,6 +89,7 @@ class DashboardView extends StatelessWidget {
     }
   }
 
+<<<<<<< HEAD
   Widget _buildHomePage(
     BuildContext context,
     DashboardState state,
@@ -101,6 +102,14 @@ class DashboardView extends StatelessWidget {
               context.read<DashboardCubit>().navigateToAddAddress(),
           onAddVehicle: () =>
               context.read<DashboardCubit>().navigateToAddVehicle(),
+=======
+  Widget _buildHomePage(BuildContext context, DashboardState state, ThemeData theme) {
+    return Column(
+      children: [
+        TopActionBar(
+          onAddAddress: () => context.read<DashboardCubit>().navigateToAddAddress(),
+          onAddVehicle: () => context.read<DashboardCubit>().navigateToAddVehicle(),
+>>>>>>> 179602d67b33f7ff3ab1c93adcb1973c0f79132e
         ),
         Expanded(child: _buildHomeBody(context, state, theme)),
       ],
@@ -143,6 +152,7 @@ class DashboardView extends StatelessWidget {
           create: (context) => ProfileLocalDataSourceImpl(),
         ),
         RepositoryProvider<ProfileRepositoryImpl>(
+<<<<<<< HEAD
           create: (context) =>
               ProfileRepositoryImpl(context.read<ProfileLocalDataSourceImpl>()),
         ),
@@ -153,17 +163,36 @@ class DashboardView extends StatelessWidget {
         RepositoryProvider<UpdateUserProfileUseCase>(
           create: (context) =>
               UpdateUserProfileUseCase(context.read<ProfileRepositoryImpl>()),
+=======
+          create: (context) => ProfileRepositoryImpl(
+            context.read<ProfileLocalDataSourceImpl>(),
+          ),
+        ),
+        RepositoryProvider<GetUserProfileUseCase>(
+          create: (context) => GetUserProfileUseCase(
+            context.read<ProfileRepositoryImpl>(),
+          ),
+        ),
+        RepositoryProvider<UpdateUserProfileUseCase>(
+          create: (context) => UpdateUserProfileUseCase(
+            context.read<ProfileRepositoryImpl>(),
+          ),
+>>>>>>> 179602d67b33f7ff3ab1c93adcb1973c0f79132e
         ),
       ],
       child: const ProfilePage(userId: 'current_user'),
     );
   }
 
+<<<<<<< HEAD
   Widget _buildHomeBody(
     BuildContext context,
     DashboardState state,
     ThemeData theme,
   ) {
+=======
+  Widget _buildHomeBody(BuildContext context, DashboardState state, ThemeData theme) {
+>>>>>>> 179602d67b33f7ff3ab1c93adcb1973c0f79132e
     if (state.isLoading) {
       return Center(
         child: CircularProgressIndicator(color: theme.colorScheme.primary),
@@ -231,6 +260,7 @@ class DashboardView extends StatelessWidget {
               mainAxisSpacing: 16,
               childAspectRatio: 0.75,
             ),
+<<<<<<< HEAD
             delegate: SliverChildBuilderDelegate((context, index) {
               final service = state.services[index];
               return ServiceCard(
@@ -241,6 +271,21 @@ class DashboardView extends StatelessWidget {
                 },
               );
             }, childCount: state.services.length),
+=======
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                final service = state.services[index];
+                return ServiceCard(
+                  service: service,
+                  onTap: () {
+                    context.read<DashboardCubit>().selectService(service.id);
+                    ServiceDetailsPage.show(context, service);
+                  },
+                );
+              },
+              childCount: state.services.length,
+            ),
+>>>>>>> 179602d67b33f7ff3ab1c93adcb1973c0f79132e
           ),
         ),
         const SliverPadding(padding: EdgeInsets.only(bottom: 32)),
