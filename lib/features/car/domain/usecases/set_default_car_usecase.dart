@@ -1,0 +1,16 @@
+import 'package:dartz/dartz.dart';
+import 'package:injectable/injectable.dart';
+
+import '../../../../core/errors/failures.dart';
+import '../repositories/car_repository.dart';
+
+@injectable
+class SetDefaultCarUseCase {
+  const SetDefaultCarUseCase(this._repository);
+
+  final CarRepository _repository;
+
+  Future<Either<Failure, void>> call(String carId) {
+    return _repository.setDefaultCar(carId);
+  }
+}

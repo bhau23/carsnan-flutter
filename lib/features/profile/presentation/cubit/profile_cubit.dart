@@ -1,51 +1,56 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/usecases/get_user_profile_usecase.dart';
 import '../../domain/usecases/update_user_profile_usecase.dart';
+import '../../../authentication/presentation/bloc/auth_bloc.dart';
+import '../../../authentication/presentation/bloc/auth_event.dart';
 import 'profile_state.dart';
 
 class ProfileCubit extends Cubit<ProfileState> {
   final GetUserProfileUseCase getUserProfileUseCase;
   final UpdateUserProfileUseCase updateUserProfileUseCase;
+  final AuthBloc authBloc;
 
   ProfileCubit({
     required this.getUserProfileUseCase,
     required this.updateUserProfileUseCase,
+    required this.authBloc,
   }) : super(const ProfileState());
 
   Future<void> loadUserProfile(String userId) async {
     emit(state.copyWith(status: ProfileStatus.loading, error: null));
-    
+
     try {
       final profile = await getUserProfileUseCase(userId);
-      emit(state.copyWith(
-        status: ProfileStatus.loaded,
-        profile: profile,
-        editingValues: {
-          'name': profile.name,
-          'email': profile.email,
-          'mobile': profile.mobile,
-          'address': profile.address,
-        },
-      ));
+      emit(
+        state.copyWith(
+          status: ProfileStatus.loaded,
+          profile: profile,
+          editingValues: {
+            'name': profile.name,
+            'email': profile.email,
+            'mobile': profile.mobile,
+            'address': profile.address,
+          },
+        ),
+      );
     } catch (e) {
-      emit(state.copyWith(
-        status: ProfileStatus.error,
-        error: e.toString(),
-      ));
+      emit(state.copyWith(status: ProfileStatus.error, error: e.toString()));
     }
   }
 
   void startEditing() {
     if (state.profile != null) {
-      emit(state.copyWith(
-        isEditing: true,
-        editingValues: {
-          'name': state.profile!.name,
-          'email': state.profile!.email,
-          'mobile': state.profile!.mobile,
-          'address': state.profile!.address,
-        },
-      ));
+      emit(
+        state.copyWith(
+          isEditing: true,
+          editingValues: {
+            'name': state.profile!.name,
+            'email': state.profile!.email,
+            'mobile': state.profile!.mobile,
+            'address': state.profile!.address,
+          },
+        ),
+      );
     }
   }
 
@@ -87,17 +92,43 @@ class ProfileCubit extends Cubit<ProfileState> {
       );
 
       final savedProfile = await updateUserProfileUseCase(updatedProfile);
-      
-      emit(state.copyWith(
-        status: ProfileStatus.loaded,
-        profile: savedProfile,
-        isEditing: false,
-      ));
+
+      emit(
+        state.copyWith(
+          status: ProfileStatus.loaded,
+          profile: savedProfile,
+          isEditing: false,
+        ),
+      );
     } catch (e) {
-      emit(state.copyWith(
-        status: ProfileStatus.error,
-        error: e.toString(),
-      ));
+      emit(state.copyWith(status: ProfileStatus.error, error: e.toString()));
+    }
+  }
+
+  Future<void> logout() async {
+    emit(state.copyWith(status: ProfileStatus.loading));
+
+    try {
+      // Dispatch SignOut event to AuthBloc
+      authBloc.add(const AuthEvent.signOut());
+
+      // Wait a moment for the auth state to update
+      await Future.delayed(const Duration(milliseconds: 100));
+
+      emit(
+        state.copyWith(
+          status: ProfileStatus.loggedOut,
+          profile: null,
+          editingValues: const {},
+        ),
+      );
+    } catch (e) {
+      emit(
+        state.copyWith(
+          status: ProfileStatus.error,
+          error: 'Logout failed: ${e.toString()}',
+        ),
+      );
     }
   }
 }

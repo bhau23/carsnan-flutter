@@ -1,3 +1,5 @@
+import 'package:injectable/injectable.dart';
+
 import '../models/user_profile_model.dart';
 
 abstract class ProfileLocalDataSource {
@@ -6,6 +8,7 @@ abstract class ProfileLocalDataSource {
   Future<void> deleteUserProfile(String userId);
 }
 
+@Injectable(as: ProfileLocalDataSource)
 class ProfileLocalDataSourceImpl implements ProfileLocalDataSource {
   // For now, we'll use a simple in-memory storage
   // In a real app, you'd use SharedPreferences, Hive, or SQLite
@@ -15,7 +18,7 @@ class ProfileLocalDataSourceImpl implements ProfileLocalDataSource {
   Future<UserProfileModel> getUserProfile(String userId) async {
     // Simulate network delay
     await Future.delayed(const Duration(milliseconds: 500));
-    
+
     // Return mock data if no profile exists
     if (!_profiles.containsKey(userId)) {
       _profiles[userId] = UserProfileModel(
@@ -29,7 +32,7 @@ class ProfileLocalDataSourceImpl implements ProfileLocalDataSource {
         gender: 'Male',
       );
     }
-    
+
     return _profiles[userId]!;
   }
 
@@ -37,7 +40,7 @@ class ProfileLocalDataSourceImpl implements ProfileLocalDataSource {
   Future<UserProfileModel> updateUserProfile(UserProfileModel profile) async {
     // Simulate network delay
     await Future.delayed(const Duration(milliseconds: 300));
-    
+
     _profiles[profile.id] = profile;
     return profile;
   }
@@ -46,7 +49,7 @@ class ProfileLocalDataSourceImpl implements ProfileLocalDataSource {
   Future<void> deleteUserProfile(String userId) async {
     // Simulate network delay
     await Future.delayed(const Duration(milliseconds: 200));
-    
+
     _profiles.remove(userId);
   }
 }

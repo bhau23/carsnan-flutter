@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import '../cubit/dashboard_cubit.dart';
 import '../cubit/dashboard_state.dart';
 import '../widgets/top_action_bar.dart';
@@ -11,6 +12,7 @@ import '../../../profile/data/datasources/profile_local_datasource.dart';
 import '../../../profile/data/repositories/profile_repository_impl.dart';
 import '../../../profile/domain/usecases/get_user_profile_usecase.dart';
 import '../../../profile/domain/usecases/update_user_profile_usecase.dart';
+import '../../../cart/presentation/widgets/cart_icon_widget.dart';
 
 class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});
@@ -48,6 +50,7 @@ class DashboardView extends StatelessWidget {
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
+        actions: const [CartIconWidget()],
       ),
       body: BlocBuilder<DashboardCubit, DashboardState>(
         builder: (context, state) {
@@ -96,8 +99,7 @@ class DashboardView extends StatelessWidget {
         TopActionBar(
           onAddAddress: () =>
               context.read<DashboardCubit>().navigateToAddAddress(),
-          onAddVehicle: () =>
-              context.read<DashboardCubit>().navigateToAddVehicle(),
+          onAddVehicle: () => _navigateToCars(context),
         ),
         Expanded(child: _buildHomeBody(context, state, theme)),
       ],
@@ -243,5 +245,9 @@ class DashboardView extends StatelessWidget {
         const SliverPadding(padding: EdgeInsets.only(bottom: 32)),
       ],
     );
+  }
+
+  void _navigateToCars(BuildContext context) {
+    context.push('/cars');
   }
 }

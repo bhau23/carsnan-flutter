@@ -1,5 +1,7 @@
 import 'package:carsnan/features/authentication/presentation/bloc/auth_bloc.dart';
 import 'package:carsnan/features/authentication/presentation/bloc/auth_event.dart';
+import 'package:carsnan/features/car/presentation/cubit/car_cubit.dart';
+import 'package:carsnan/features/cart/presentation/cubit/cart_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -29,8 +31,15 @@ class App extends StatelessWidget {
               GetServicesUseCase(context.read<ServiceRepositoryImpl>()),
         ),
       ],
-      child: BlocProvider(
-        create: (context) => getIt<AuthBloc>()..add(const CheckAuthStatus()),
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider(
+            create: (context) =>
+                getIt<AuthBloc>()..add(const CheckAuthStatus()),
+          ),
+          BlocProvider(create: (context) => getIt<CarCubit>()),
+          BlocProvider(create: (context) => getIt<CartCubit>()..loadCart()),
+        ],
         child: Builder(
           builder: (context) {
             final router = AppRouter(authBloc: context.read<AuthBloc>()).router;
