@@ -97,8 +97,6 @@ class DashboardView extends StatelessWidget {
     return Column(
       children: [
         TopActionBar(
-          onAddAddress: () =>
-              context.read<DashboardCubit>().navigateToAddAddress(),
           onAddVehicle: () => _navigateToCars(context),
         ),
         Expanded(child: _buildHomeBody(context, state, theme)),

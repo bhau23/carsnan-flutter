@@ -14,7 +14,6 @@ class AppConstants {
   static const String profileLabel = 'My Profile';
   
   // Actions
-  static const String addAddressLabel = 'Add Address';
   static const String addVehicleLabel = 'Add Vehicle';
   static const String selectServiceLabel = 'Select Service';
   static const String retryLabel = 'Retry';

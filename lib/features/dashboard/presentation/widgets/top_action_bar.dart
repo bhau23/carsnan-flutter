@@ -2,12 +2,10 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_constants.dart';
 
 class TopActionBar extends StatelessWidget {
-  final VoidCallback onAddAddress;
   final VoidCallback onAddVehicle;
 
   const TopActionBar({
     super.key,
-    required this.onAddAddress,
     required this.onAddVehicle,
   });
 
@@ -18,15 +16,8 @@ class TopActionBar extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(AppSizes.mediumPadding),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          _buildActionButton(
-            context: context,
-            icon: Icons.location_on,
-            label: AppConstants.addAddressLabel,
-            onTap: onAddAddress,
-            theme: theme,
-          ),
           _buildActionButton(
             context: context,
             icon: Icons.directions_car,

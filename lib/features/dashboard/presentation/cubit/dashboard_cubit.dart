@@ -25,10 +25,6 @@ class DashboardCubit extends Cubit<DashboardState> {
     emit(state.copyWith(selectedBottomNavIndex: index));
   }
 
-  void navigateToAddAddress() {
-    // TODO: Implement navigation to add address page
-  }
-
   void navigateToAddVehicle() {
     // TODO: Implement navigation to add vehicle page
   }
