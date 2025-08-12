@@ -1,3 +1,4 @@
+import 'package:injectable/injectable.dart';
 import '../../domain/entities/service.dart';
 
 abstract class ServiceLocalDataSource {
@@ -5,6 +6,7 @@ abstract class ServiceLocalDataSource {
   Future<Service> getServiceById(String id);
 }
 
+@Injectable(as: ServiceLocalDataSource)
 class ServiceLocalDataSourceImpl implements ServiceLocalDataSource {
   @override
   Future<List<Service>> getServices() async {
@@ -13,7 +15,8 @@ class ServiceLocalDataSourceImpl implements ServiceLocalDataSource {
       const Service(
         id: '1',
         title: 'General Wash',
-        description: 'Complete exterior and interior cleaning with basic maintenance checks',
+        description:
+            'Complete exterior and interior cleaning with basic maintenance checks',
         iconPath: 'assets/images/services/general_wash.png',
         bannerImagePath: 'assets/images/services/general_wash_banner.jpg',
         type: ServiceType.general,
@@ -56,7 +59,8 @@ class ServiceLocalDataSourceImpl implements ServiceLocalDataSource {
       const Service(
         id: '2',
         title: 'Premium Wash',
-        description: 'Enhanced service with detailed cleaning and comprehensive maintenance',
+        description:
+            'Enhanced service with detailed cleaning and comprehensive maintenance',
         iconPath: 'assets/images/services/premium_wash.png',
         bannerImagePath: 'assets/images/services/premium_wash_banner.jpg',
         type: ServiceType.premium,
@@ -106,7 +110,8 @@ class ServiceLocalDataSourceImpl implements ServiceLocalDataSource {
       const Service(
         id: '3',
         title: 'Luxury Wash',
-        description: 'Premium luxury car service experience with complete detailing and maintenance',
+        description:
+            'Premium luxury car service experience with complete detailing and maintenance',
         iconPath: 'assets/images/services/luxury_wash.png',
         bannerImagePath: 'assets/images/services/luxury_wash_banner.jpg',
         type: ServiceType.luxury,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/di/injection.dart';
 import '../cubit/profile_cubit.dart';
 import '../cubit/profile_state.dart';
 import '../widgets/profile_header.dart';
@@ -11,17 +12,15 @@ import '../widgets/profile_actions_section.dart';
 class ProfilePage extends StatelessWidget {
   final String userId;
 
-  const ProfilePage({
-    super.key,
-    required this.userId,
-  });
+  const ProfilePage({super.key, required this.userId});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => ProfileCubit(
-        getUserProfileUseCase: context.read(),
-        updateUserProfileUseCase: context.read(),
+        getUserProfileUseCase: getIt(),
+        updateUserProfileUseCase: getIt(),
+        authBloc: context.read(),
       )..loadUserProfile(userId),
       child: const ProfileView(),
     );
@@ -46,12 +45,13 @@ class ProfileView extends StatelessWidget {
               ),
             );
           }
+
+          // Note: No need to manually navigate on logout
+          // The router will automatically redirect based on AuthBloc state
         },
         builder: (context, state) {
           if (state.isLoading && state.profile == null) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
+            return const Center(child: CircularProgressIndicator());
           }
 
           if (state.profile == null) {
@@ -65,15 +65,14 @@ class ProfileView extends StatelessWidget {
                     color: theme.colorScheme.outline,
                   ),
                   const SizedBox(height: 16),
-                  Text(
-                    'Profile not found',
-                    style: theme.textTheme.titleLarge,
-                  ),
+                  Text('Profile not found', style: theme.textTheme.titleLarge),
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () {
                       // Get userId from context or navigation
-                      context.read<ProfileCubit>().loadUserProfile('current_user');
+                      context.read<ProfileCubit>().loadUserProfile(
+                        'current_user',
+                      );
                     },
                     child: const Text('Retry'),
                   ),
@@ -134,10 +133,13 @@ class ProfileView extends StatelessWidget {
                                 children: [
                                   TextButton(
                                     onPressed: () {
-                                      context.read<ProfileCubit>().cancelEditing();
+                                      context
+                                          .read<ProfileCubit>()
+                                          .cancelEditing();
                                     },
                                     style: TextButton.styleFrom(
-                                      foregroundColor: theme.colorScheme.outline,
+                                      foregroundColor:
+                                          theme.colorScheme.outline,
                                     ),
                                     child: const Text('Cancel'),
                                   ),
@@ -146,7 +148,9 @@ class ProfileView extends StatelessWidget {
                                     onPressed: state.isLoading
                                         ? null
                                         : () {
-                                            context.read<ProfileCubit>().saveProfile();
+                                            context
+                                                .read<ProfileCubit>()
+                                                .saveProfile();
                                           },
                                     icon: state.isLoading
                                         ? const SizedBox(
@@ -177,60 +181,76 @@ class ProfileView extends StatelessWidget {
                           ],
                         ),
                         const SizedBox(height: 24),
-                        
+
                         // Contact Information Section
                         _buildSectionHeader(context, 'Contact Information'),
                         const SizedBox(height: 12),
                         EditableProfileField(
                           label: 'Full Name',
                           value: state.isEditing
-                              ? state.editingValues['name'] ?? state.profile!.name
+                              ? state.editingValues['name'] ??
+                                    state.profile!.name
                               : state.profile!.name,
                           isEditing: state.isEditing,
                           icon: Icons.person_outlined,
                           onChanged: (value) {
-                            context.read<ProfileCubit>().updateEditingValue('name', value);
+                            context.read<ProfileCubit>().updateEditingValue(
+                              'name',
+                              value,
+                            );
                           },
                         ),
                         EditableProfileField(
                           label: 'Email Address',
                           value: state.isEditing
-                              ? state.editingValues['email'] ?? state.profile!.email
+                              ? state.editingValues['email'] ??
+                                    state.profile!.email
                               : state.profile!.email,
                           isEditing: state.isEditing,
                           icon: Icons.email_outlined,
                           keyboardType: TextInputType.emailAddress,
                           onChanged: (value) {
-                            context.read<ProfileCubit>().updateEditingValue('email', value);
+                            context.read<ProfileCubit>().updateEditingValue(
+                              'email',
+                              value,
+                            );
                           },
                         ),
                         EditableProfileField(
                           label: 'Mobile Number',
                           value: state.isEditing
-                              ? state.editingValues['mobile'] ?? state.profile!.mobile
+                              ? state.editingValues['mobile'] ??
+                                    state.profile!.mobile
                               : state.profile!.mobile,
                           isEditing: state.isEditing,
                           icon: Icons.phone_outlined,
                           keyboardType: TextInputType.phone,
                           onChanged: (value) {
-                            context.read<ProfileCubit>().updateEditingValue('mobile', value);
+                            context.read<ProfileCubit>().updateEditingValue(
+                              'mobile',
+                              value,
+                            );
                           },
                         ),
                         EditableProfileField(
                           label: 'Full Address',
                           value: state.isEditing
-                              ? state.editingValues['address'] ?? state.profile!.address
+                              ? state.editingValues['address'] ??
+                                    state.profile!.address
                               : state.profile!.address,
                           isEditing: state.isEditing,
                           icon: Icons.location_on_outlined,
                           maxLines: 3,
                           onChanged: (value) {
-                            context.read<ProfileCubit>().updateEditingValue('address', value);
+                            context.read<ProfileCubit>().updateEditingValue(
+                              'address',
+                              value,
+                            );
                           },
                         ),
 
                         const SizedBox(height: 24),
-                        
+
                         // Personal Information Section
                         _buildSectionHeader(context, 'Personal Information'),
                         const SizedBox(height: 12),
@@ -238,7 +258,9 @@ class ProfileView extends StatelessWidget {
                           dateOfBirth: state.profile!.dateOfBirth,
                           isEditing: state.isEditing,
                           onChanged: (dateOfBirth) {
-                            context.read<ProfileCubit>().updateDateOfBirth(dateOfBirth);
+                            context.read<ProfileCubit>().updateDateOfBirth(
+                              dateOfBirth,
+                            );
                           },
                         ),
                         GenderField(
@@ -250,13 +272,14 @@ class ProfileView extends StatelessWidget {
                         ),
 
                         const SizedBox(height: 24),
-                        
+
                         // Account Actions Section
                         _buildSectionHeader(context, 'Account Settings'),
                         const SizedBox(height: 12),
                         ProfileActionsSection(
                           onLogout: () => _showLogoutDialog(context),
-                          onDeleteAccount: () => _showDeleteAccountDialog(context),
+                          onDeleteAccount: () =>
+                              _showDeleteAccountDialog(context),
                         ),
 
                         const SizedBox(height: 40),
@@ -275,36 +298,48 @@ class ProfileView extends StatelessWidget {
   void _showLogoutDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Logout'),
-          content: const Text('Are you sure you want to logout?'),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
+      builder: (BuildContext dialogContext) {
+        return BlocProvider.value(
+          value: context.read<ProfileCubit>(),
+          child: AlertDialog(
+            title: const Text('Logout'),
+            content: const Text('Are you sure you want to logout?'),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
             ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                // TODO: Implement logout functionality
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Logout functionality coming soon!'),
-                    backgroundColor: Color(0xFFD4AF37),
-                  ),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFD4AF37),
-                foregroundColor: const Color(0xFF2C2C2C),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(),
+                child: const Text('Cancel'),
               ),
-              child: const Text('Logout'),
-            ),
-          ],
+              BlocBuilder<ProfileCubit, ProfileState>(
+                builder: (context, state) {
+                  return ElevatedButton(
+                    onPressed: state.isLoading
+                        ? null
+                        : () {
+                            Navigator.of(dialogContext).pop();
+                            context.read<ProfileCubit>().logout();
+                          },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFD4AF37),
+                      foregroundColor: const Color(0xFF2C2C2C),
+                    ),
+                    child: state.isLoading
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Color(0xFF2C2C2C),
+                            ),
+                          )
+                        : const Text('Logout'),
+                  );
+                },
+              ),
+            ],
+          ),
         );
       },
     );

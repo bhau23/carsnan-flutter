@@ -1,6 +1,6 @@
 import '../../domain/entities/user_profile.dart';
 
-enum ProfileStatus { initial, loading, loaded, editing, error }
+enum ProfileStatus { initial, loading, loaded, editing, error, loggedOut }
 
 class ProfileState {
   final ProfileStatus status;
@@ -36,4 +36,5 @@ class ProfileState {
   bool get isLoading => status == ProfileStatus.loading;
   bool get isLoaded => status == ProfileStatus.loaded;
   bool get hasError => status == ProfileStatus.error;
+  bool get isLoggedOut => status == ProfileStatus.loggedOut;
 }

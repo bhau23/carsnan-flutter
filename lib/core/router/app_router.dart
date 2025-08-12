@@ -7,6 +7,10 @@ import 'package:carsnan/features/authentication/presentation/pages/mfa_verificat
 import 'package:carsnan/features/authentication/presentation/pages/otp_verification_page.dart';
 import 'package:carsnan/features/authentication/presentation/pages/phone_authentication_page.dart';
 import 'package:carsnan/features/dashboard/presentation/pages/dashboard_page.dart';
+import 'package:carsnan/features/car/presentation/pages/car_list_page.dart';
+import 'package:carsnan/features/car/presentation/pages/add_car_page.dart';
+import 'package:carsnan/features/car/presentation/pages/edit_car_page.dart';
+import 'package:carsnan/features/cart/presentation/pages/cart_page.dart';
 import 'dart:async';
 
 class AppRouter {
@@ -44,6 +48,28 @@ class AppRouter {
         path: '/otp',
         builder: (BuildContext context, GoRouterState state) =>
             const OtpVerificationPage(),
+      ),
+      // Car management routes
+      GoRoute(
+        path: '/cars',
+        builder: (BuildContext context, GoRouterState state) =>
+            const CarListPage(),
+      ),
+      GoRoute(
+        path: '/cars/add',
+        builder: (BuildContext context, GoRouterState state) =>
+            const AddCarPage(),
+      ),
+      GoRoute(
+        path: '/cars/edit/:carId',
+        builder: (BuildContext context, GoRouterState state) =>
+            EditCarPage(carId: state.pathParameters['carId']!),
+      ),
+      // Cart route
+      GoRoute(
+        path: '/cart',
+        builder: (BuildContext context, GoRouterState state) =>
+            const CartPage(),
       ),
     ],
     redirect: (BuildContext context, GoRouterState state) {

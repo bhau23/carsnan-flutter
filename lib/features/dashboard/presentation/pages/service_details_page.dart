@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../domain/entities/service.dart';
 import '../widgets/service_item_card.dart';
+import '../../../cart/presentation/widgets/car_selection_bottom_sheet.dart';
 
 class ServiceDetailsPage extends StatefulWidget {
   final Service service;
@@ -522,19 +523,13 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
 
             const SizedBox(width: 16),
 
-            // Right side - Book now button
+            // Right side - Add to Cart button
             Expanded(
               flex: 3,
               child: ElevatedButton(
                 onPressed: () {
-                  // Handle booking logic
-                  Navigator.of(context).pop();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('${widget.service.title} added to cart!'),
-                      backgroundColor: theme.colorScheme.primary,
-                    ),
-                  );
+                  // Show car selection bottom sheet
+                  CarSelectionBottomSheet.show(context, widget.service);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: theme.colorScheme.primary,
@@ -545,7 +540,7 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                   ),
                 ),
                 child: const Text(
-                  'Book Now',
+                  'Add to Cart',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               ),
