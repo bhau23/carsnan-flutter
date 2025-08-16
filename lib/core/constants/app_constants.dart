@@ -15,6 +15,7 @@ class AppConstants {
   
   // Actions
   static const String addVehicleLabel = 'Add Vehicle';
+  static const String addAddressLabel = 'Add Address';
   static const String selectServiceLabel = 'Select Service';
   static const String retryLabel = 'Retry';
   
