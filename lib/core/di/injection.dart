@@ -10,6 +10,8 @@ import '../../features/address/domain/usecases/add_address_usecase.dart';
 import '../../features/address/domain/usecases/set_default_address_usecase.dart';
 import '../../features/address/presentation/cubit/address_cubit.dart';
 import '../services/location_service.dart';
+import '../services/vehicle_selection_service.dart';
+import '../services/dynamic_pricing_service.dart';
 
 import 'injection.config.dart';
 
@@ -19,6 +21,18 @@ final getIt = GetIt.instance;
 void configureDependencies() {
   getIt.init();
   _setupAddressDependencies();
+  _setupVehicleServices();
+}
+
+void _setupVehicleServices() {
+  // Register vehicle selection and pricing services
+  getIt.registerSingleton<VehicleSelectionService>(
+    VehicleSelectionService(),
+  );
+
+  getIt.registerLazySingleton<DynamicPricingService>(
+    () => DynamicPricingService(),
+  );
 }
 
 void _setupAddressDependencies() {

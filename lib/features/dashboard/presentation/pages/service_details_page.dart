@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/di/injection.dart';
+import '../../../../core/services/dynamic_pricing_service.dart';
+import '../../../../core/services/vehicle_selection_service.dart';
 import '../../domain/entities/service.dart';
 import '../widgets/service_item_card.dart';
-import '../../../cart/presentation/widgets/car_selection_bottom_sheet.dart';
+import '../../../cart/presentation/cubit/cart_cubit.dart';
+import '../../../car/domain/entities/car.dart';
 
 class ServiceDetailsPage extends StatefulWidget {
   final Service service;
@@ -495,58 +500,128 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
         ],
       ),
       child: SafeArea(
-        child: Row(
-          children: [
-            // Left side - Price and duration
-            Expanded(
-              flex: 2,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    '₹${widget.service.price.toStringAsFixed(0)}',
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: theme.colorScheme.primary,
-                    ),
-                  ),
-                  Text(
-                    '${widget.service.estimatedDurationInMinutes} mins',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(width: 16),
-
-            // Right side - Add to Cart button
-            Expanded(
-              flex: 3,
-              child: ElevatedButton(
-                onPressed: () {
-                  // Show car selection bottom sheet
-                  CarSelectionBottomSheet.show(context, widget.service);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: theme.colorScheme.primary,
-                  foregroundColor: theme.colorScheme.onPrimary,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+        child: StreamBuilder(
+          stream: getIt<VehicleSelectionService>().selectedVehicleStream,
+          initialData: getIt<VehicleSelectionService>().selectedVehicle,
+          builder: (context, snapshot) {
+            final selectedCar = snapshot.data;
+            final pricingService = getIt<DynamicPricingService>();
+            final pricingInfo = pricingService.getPricingInfo(widget.service, selectedCar);
+            
+            return Row(
+              children: [
+                // Left side - Price and duration with vehicle info
+                Expanded(
+                  flex: 2,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (selectedCar != null) ...[
+                        Row(
+                          children: [
+                            Text(
+                              selectedCar.type.icon,
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              selectedCar.type.displayName,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                      ],
+                      Text(
+                        '₹${pricingInfo.finalPrice.toStringAsFixed(0)}',
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
+                      Text(
+                        '${widget.service.estimatedDurationInMinutes} mins',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                child: const Text(
-                  'Add to Cart',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+
+                const SizedBox(width: 16),
+
+                // Right side - Add to Cart button
+                Expanded(
+                  flex: 3,
+                  child: ElevatedButton(
+                    onPressed: selectedCar != null 
+                      ? () => _addToCartDirectly(context, selectedCar)
+                      : () => _showSelectVehicleMessage(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: theme.colorScheme.primary,
+                      foregroundColor: theme.colorScheme.onPrimary,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(
+                      selectedCar != null ? 'Add to Cart' : 'Select Vehicle First',
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                  ),
                 ),
-              ),
-            ),
-          ],
+              ],
+            );
+          },
         ),
+      ),
+    );
+  }
+
+  void _addToCartDirectly(BuildContext context, Car selectedCar) async {
+    final cartCubit = context.read<CartCubit>();
+    
+    try {
+      await cartCubit.addToCart(service: widget.service, car: selectedCar);
+      
+      if (context.mounted) {
+        // Close the service details modal
+        Navigator.pop(context);
+        
+        // Show success message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${widget.service.title} added to cart for ${selectedCar.displayName}'),
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to add to cart: $e'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
+
+  void _showSelectVehicleMessage(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Please add a vehicle first from the dashboard'),
+        behavior: SnackBarBehavior.floating,
       ),
     );
   }

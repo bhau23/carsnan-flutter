@@ -100,35 +100,31 @@ class Car extends Equatable {
   ];
 }
 
-/// Enum for different car types with pricing information
+/// Enum for different car types
 enum CarType {
-  /// Standard sedan cars (base pricing)
+  /// Standard sedan cars
   sedan(
     displayName: 'Sedan',
-    priceMultiplier: 1.0,
     icon: '🚗',
     description: 'Perfect for standard car wash services',
   ),
 
-  /// Sport Utility Vehicles (20% premium)
+  /// Sport Utility Vehicles
   suv(
     displayName: 'SUV',
-    priceMultiplier: 1.2,
     icon: '🚙',
     description: 'Larger vehicles require more attention',
   ),
 
-  /// Compact/Mini cars (20% discount)
+  /// Compact/Mini cars
   mini(
     displayName: 'Mini',
-    priceMultiplier: 0.8,
     icon: '🚕',
-    description: 'Smaller vehicles, lower pricing',
+    description: 'Smaller vehicles, efficient pricing',
   );
 
   const CarType({
     required this.displayName,
-    required this.priceMultiplier,
     required this.icon,
     required this.description,
   });
@@ -136,17 +132,9 @@ enum CarType {
   /// Human-readable name
   final String displayName;
 
-  /// Price multiplier for services
-  final double priceMultiplier;
-
   /// Icon representation
   final String icon;
 
   /// Description of the car type
   final String description;
-
-  /// Calculate service price based on base price
-  double calculatePrice(double basePrice) {
-    return basePrice * priceMultiplier;
-  }
 }

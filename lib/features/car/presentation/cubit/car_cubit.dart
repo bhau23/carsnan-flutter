@@ -100,9 +100,4 @@ class CarCubit extends Cubit<CarState> {
     }
     return [];
   }
-
-  /// Get default car from current state
-  Car? get defaultCar {
-    return cars.where((car) => car.isDefault).firstOrNull;
-  }
 }

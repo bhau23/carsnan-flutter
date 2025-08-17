@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
+import '../../../../core/services/vehicle_selection_service.dart';
+import '../../domain/entities/car.dart';
 import '../cubit/car_cubit.dart';
 import '../cubit/car_state.dart';
 import '../widgets/car_card.dart';
@@ -44,17 +46,27 @@ class CarListPage extends StatelessWidget {
 
               return RefreshIndicator(
                 onRefresh: () => context.read<CarCubit>().loadCars(),
-                child: ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: state.cars.length,
-                  itemBuilder: (context, index) {
-                    final car = state.cars[index];
-                    return CarCard(
-                      car: car,
-                      onTap: () => _navigateToEditCar(context, car.id),
-                      onDelete: () => _showDeleteDialog(context, car),
-                      onSetDefault: () =>
-                          context.read<CarCubit>().setDefaultCar(car.id),
+                child: StreamBuilder(
+                  stream: getIt<VehicleSelectionService>().selectedVehicleStream,
+                  initialData: getIt<VehicleSelectionService>().selectedVehicle,
+                  builder: (context, snapshot) {
+                    final selectedCar = snapshot.data;
+                    
+                    return ListView.builder(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: state.cars.length,
+                      itemBuilder: (context, index) {
+                        final car = state.cars[index];
+                        final isSelected = selectedCar?.id == car.id;
+                        
+                        return CarCard(
+                          car: car,
+                          isSelected: isSelected,
+                          onTap: () => _navigateToEditCar(context, car.id),
+                          onDelete: () => _showDeleteDialog(context, car),
+                          onSelect: () => _selectCar(context, car),
+                        );
+                      },
                     );
                   },
                 ),
@@ -70,6 +82,19 @@ class CarListPage extends StatelessWidget {
           onPressed: () => _navigateToAddCar(context),
           child: const Icon(Icons.add),
         ),
+      ),
+    );
+  }
+
+  void _selectCar(BuildContext context, Car car) {
+    getIt<VehicleSelectionService>().setSelectedVehicle(car);
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('${car.displayName} selected as active vehicle'),
+        backgroundColor: Colors.green,
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 2),
       ),
     );
   }

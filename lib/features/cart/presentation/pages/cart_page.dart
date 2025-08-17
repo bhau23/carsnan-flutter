@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import '../cubit/cart_cubit.dart';
 import '../cubit/cart_state.dart';
 import '../widgets/cart_item_widget.dart';
@@ -217,6 +218,27 @@ class CartPage extends StatelessWidget {
                 ),
               ),
             ),
+            
+            const SizedBox(height: 12),
+            
+            // Add Another Service button
+            OutlinedButton(
+              onPressed: () => _addAnotherService(context),
+              style: OutlinedButton.styleFrom(
+                side: BorderSide(color: theme.colorScheme.primary),
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: Text(
+                'Add Another Service',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.primary,
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -259,5 +281,10 @@ class CartPage extends StatelessWidget {
         behavior: SnackBarBehavior.floating,
       ),
     );
+  }
+
+  void _addAnotherService(BuildContext context) {
+    // Navigate to car selection page where users can select a car for another service
+    context.push('/cars');
   }
 }

@@ -23,9 +23,12 @@ class CartItem extends Equatable {
   /// When this item was added to the cart
   final DateTime addedAt;
 
-  /// Calculate the final price including car type multiplier
+  /// Calculate the final price using the dynamic pricing service
+  /// Note: This getter should ideally receive DynamicPricingService via dependency injection
+  /// For now, we'll return the service price as-is and let the UI handle dynamic pricing
   double get finalPrice {
-    return car.type.calculatePrice(service.price);
+    // This will be calculated by the UI layer using DynamicPricingService
+    return service.price;
   }
 
   /// Get a display string for the service duration

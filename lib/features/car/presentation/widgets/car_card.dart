@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import '../../domain/entities/car.dart';
 
 class CarCard extends StatelessWidget {
@@ -8,15 +7,17 @@ class CarCard extends StatelessWidget {
     required this.car,
     this.onTap,
     this.onDelete,
-    this.onSetDefault,
+    this.onSelect,
     this.showActions = true,
+    this.isSelected = false,
   });
 
   final Car car;
   final VoidCallback? onTap;
   final VoidCallback? onDelete;
-  final VoidCallback? onSetDefault;
+  final VoidCallback? onSelect;
   final bool showActions;
+  final bool isSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -69,8 +70,8 @@ class CarCard extends StatelessWidget {
                     ),
                   ),
 
-                  // Default badge
-                  if (car.isDefault)
+                  // Selected badge or default badge
+                  if (isSelected)
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 8,
@@ -80,13 +81,27 @@ class CarCard extends StatelessWidget {
                         color: Colors.green,
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Text(
-                        'Default',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 8,
+                            height: 8,
+                            decoration: const BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          const Text(
+                            'LIVE',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                 ],
@@ -133,13 +148,17 @@ class CarCard extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    if (!car.isDefault && onSetDefault != null)
+                    // Select button
+                    if (onSelect != null)
                       TextButton.icon(
-                        onPressed: onSetDefault,
-                        icon: const Icon(Icons.star_border, size: 18),
-                        label: const Text('Set Default'),
+                        onPressed: onSelect,
+                        icon: Icon(
+                          isSelected ? Icons.radio_button_checked : Icons.radio_button_unchecked, 
+                          size: 18,
+                        ),
+                        label: Text(isSelected ? 'Selected' : 'Select'),
                         style: TextButton.styleFrom(
-                          foregroundColor: Colors.orange,
+                          foregroundColor: isSelected ? Colors.green : Theme.of(context).primaryColor,
                         ),
                       ),
 
