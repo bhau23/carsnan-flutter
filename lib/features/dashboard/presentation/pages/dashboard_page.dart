@@ -12,6 +12,7 @@ import '../../../profile/data/repositories/profile_repository_impl.dart';
 import '../../../profile/domain/usecases/get_user_profile_usecase.dart';
 import '../../../profile/domain/usecases/update_user_profile_usecase.dart';
 import '../../../cart/presentation/widgets/cart_icon_widget.dart';
+import '../../../cart/presentation/widgets/floating_cart_bar.dart';
 import '../../../address/presentation/cubit/address_cubit.dart';
 import '../../../../core/di/injection.dart';
 
@@ -62,12 +63,23 @@ class DashboardView extends StatelessWidget {
       ),
       body: BlocBuilder<DashboardCubit, DashboardState>(
         builder: (context, state) {
-          return IndexedStack(
-            index: state.selectedBottomNavIndex,
+          return Stack(
             children: [
-              _buildHomePage(context, state, theme),
-              _buildOrdersPage(context, theme),
-              _buildProfilePage(context),
+              IndexedStack(
+                index: state.selectedBottomNavIndex,
+                children: [
+                  _buildHomePage(context, state, theme),
+                  _buildOrdersPage(context, theme),
+                  _buildProfilePage(context),
+                ],
+              ),
+              // Floating cart bar positioned above bottom navigation
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 15, // Very close to bottom navigation bar
+                child: const FloatingCartBar(),
+              ),
             ],
           );
         },
@@ -249,7 +261,7 @@ class DashboardView extends StatelessWidget {
             }, childCount: state.services.length),
           ),
         ),
-        const SliverPadding(padding: EdgeInsets.only(bottom: 32)),
+        const SliverPadding(padding: EdgeInsets.only(bottom: 80)),
       ],
     );
   }
