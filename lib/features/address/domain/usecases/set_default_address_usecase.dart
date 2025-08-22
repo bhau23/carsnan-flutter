@@ -1,7 +1,9 @@
 import 'package:dartz/dartz.dart';
+import 'package:injectable/injectable.dart';
 import '../../../../core/errors/failures.dart';
 import '../repositories/address_repository.dart';
 
+@injectable
 class SetDefaultAddressUseCase {
   final AddressRepository repository;
 

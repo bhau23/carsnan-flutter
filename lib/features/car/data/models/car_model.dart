@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../domain/entities/car.dart';
 
@@ -39,6 +40,50 @@ class CarModel {
       _$CarModelFromJson(json);
 
   Map<String, dynamic> toJson() => _$CarModelToJson(this);
+
+  /// Convert to Firestore document
+  Map<String, dynamic> toFirestore() {
+    return {
+      'make': make,
+      'model': model,
+      'year': year,
+      'color': color,
+      'licensePlate': licensePlate,
+      'nickname': nickname,
+      'type': type.name,
+      'isDefault': isDefault,
+      'createdAt': Timestamp.fromDate(createdAt),
+      'updatedAt': Timestamp.fromDate(updatedAt),
+    };
+  }
+
+  /// Create from Firestore document
+  factory CarModel.fromFirestore(String id, Map<String, dynamic> data) {
+    return CarModel(
+      id: id,
+      make: data['make'] as String,
+      model: data['model'] as String,
+      year: data['year'] as int,
+      color: data['color'] as String,
+      licensePlate: data['licensePlate'] as String,
+      nickname: data['nickname'] as String?,
+      type: CarType.values.firstWhere(
+        (type) => type.name == data['type'],
+        orElse: () => CarType.sedan,
+      ),
+      isDefault: data['isDefault'] as bool? ?? false,
+      createdAt: data['createdAt'] is Timestamp
+          ? (data['createdAt'] as Timestamp).toDate()
+          : data['createdAt'] is String
+          ? DateTime.parse(data['createdAt'] as String)
+          : DateTime.now(),
+      updatedAt: data['updatedAt'] is Timestamp
+          ? (data['updatedAt'] as Timestamp).toDate()
+          : data['updatedAt'] is String
+          ? DateTime.parse(data['updatedAt'] as String)
+          : DateTime.now(),
+    );
+  }
 
   /// Convert model to domain entity
   Car toEntity() {

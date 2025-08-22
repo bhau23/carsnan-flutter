@@ -20,21 +20,38 @@ class ProfileCubit extends Cubit<ProfileState> {
     emit(state.copyWith(status: ProfileStatus.loading, error: null));
 
     try {
-      final profile = await getUserProfileUseCase(userId);
-      emit(
-        state.copyWith(
-          status: ProfileStatus.loaded,
-          profile: profile,
-          editingValues: {
-            'name': profile.name,
-            'email': profile.email,
-            'mobile': profile.mobile,
-            'address': profile.address,
-          },
-        ),
+      final result = await getUserProfileUseCase.call(userId);
+      result.fold(
+        (failure) {
+          emit(
+            state.copyWith(
+              status: ProfileStatus.error,
+              error: failure.message,
+            ),
+          );
+        },
+        (profile) {
+          emit(
+            state.copyWith(
+              status: ProfileStatus.loaded,
+              profile: profile,
+              editingValues: {
+                'name': profile.displayName,
+                'email': profile.email ?? '',
+                'mobile': profile.phoneNumber ?? '',
+                'address': profile.address ?? '',
+              },
+            ),
+          );
+        },
       );
     } catch (e) {
-      emit(state.copyWith(status: ProfileStatus.error, error: e.toString()));
+      emit(
+        state.copyWith(
+          status: ProfileStatus.error,
+          error: e.toString(),
+        ),
+      );
     }
   }
 
@@ -44,10 +61,10 @@ class ProfileCubit extends Cubit<ProfileState> {
         state.copyWith(
           isEditing: true,
           editingValues: {
-            'name': state.profile!.name,
-            'email': state.profile!.email,
-            'mobile': state.profile!.mobile,
-            'address': state.profile!.address,
+            'name': state.profile!.displayName,
+            'email': state.profile!.email ?? '',
+            'mobile': state.profile!.phoneNumber ?? '',
+            'address': state.profile!.address ?? '',
           },
         ),
       );
@@ -85,13 +102,13 @@ class ProfileCubit extends Cubit<ProfileState> {
 
     try {
       final updatedProfile = state.profile!.copyWith(
-        name: state.editingValues['name'],
+        displayName: state.editingValues['name'],
         email: state.editingValues['email'],
-        mobile: state.editingValues['mobile'],
+        phoneNumber: state.editingValues['mobile'],
         address: state.editingValues['address'],
       );
 
-      final savedProfile = await updateUserProfileUseCase(updatedProfile);
+      final savedProfile = await updateUserProfileUseCase.call(updatedProfile);
 
       emit(
         state.copyWith(

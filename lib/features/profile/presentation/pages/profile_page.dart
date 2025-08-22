@@ -189,8 +189,8 @@ class ProfileView extends StatelessWidget {
                           label: 'Full Name',
                           value: state.isEditing
                               ? state.editingValues['name'] ??
-                                    state.profile!.name
-                              : state.profile!.name,
+                                    state.profile!.displayName
+                              : state.profile!.displayName,
                           isEditing: state.isEditing,
                           icon: Icons.person_outlined,
                           onChanged: (value) {
@@ -204,8 +204,8 @@ class ProfileView extends StatelessWidget {
                           label: 'Email Address',
                           value: state.isEditing
                               ? state.editingValues['email'] ??
-                                    state.profile!.email
-                              : state.profile!.email,
+                                    (state.profile!.email ?? '')
+                              : (state.profile!.email ?? ''),
                           isEditing: state.isEditing,
                           icon: Icons.email_outlined,
                           keyboardType: TextInputType.emailAddress,
@@ -220,8 +220,8 @@ class ProfileView extends StatelessWidget {
                           label: 'Mobile Number',
                           value: state.isEditing
                               ? state.editingValues['mobile'] ??
-                                    state.profile!.mobile
-                              : state.profile!.mobile,
+                                    (state.profile!.phoneNumber ?? '')
+                              : (state.profile!.phoneNumber ?? ''),
                           isEditing: state.isEditing,
                           icon: Icons.phone_outlined,
                           keyboardType: TextInputType.phone,
@@ -236,8 +236,8 @@ class ProfileView extends StatelessWidget {
                           label: 'Full Address',
                           value: state.isEditing
                               ? state.editingValues['address'] ??
-                                    state.profile!.address
-                              : state.profile!.address,
+                                    (state.profile!.address ?? '')
+                              : (state.profile!.address ?? ''),
                           isEditing: state.isEditing,
                           icon: Icons.location_on_outlined,
                           maxLines: 3,

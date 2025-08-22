@@ -6,7 +6,7 @@ import '../cubit/cart_state.dart';
 import '../pages/cart_page.dart';
 
 class FloatingCartBar extends StatefulWidget {
-  const FloatingCartBar({Key? key}) : super(key: key);
+  const FloatingCartBar({super.key});
 
   @override
   State<FloatingCartBar> createState() => _FloatingCartBarState();
@@ -16,12 +16,14 @@ class _FloatingCartBarState extends State<FloatingCartBar>
     with TickerProviderStateMixin {
   late AnimationController _slideController;
   late AnimationController _fadeController;
-  
+
   @override
   void initState() {
     super.initState();
     _slideController = AnimationController(
-      duration: const Duration(milliseconds: 250), // Reduced duration for better performance
+      duration: const Duration(
+        milliseconds: 250,
+      ), // Reduced duration for better performance
       vsync: this,
     );
     _fadeController = AnimationController(
@@ -50,20 +52,25 @@ class _FloatingCartBarState extends State<FloatingCartBar>
         }
 
         _slideController.forward();
-        
+
         final totalPrice = state.totalPrice;
         final itemCount = state.itemCount;
 
         return SlideTransition(
-          position: Tween<Offset>(
-            begin: const Offset(0, 1),
-            end: Offset.zero,
-          ).animate(CurvedAnimation(
-            parent: _slideController,
-            curve: Curves.easeOutBack,
-          )),
+          position: Tween<Offset>(begin: const Offset(0, 1), end: Offset.zero)
+              .animate(
+                CurvedAnimation(
+                  parent: _slideController,
+                  curve: Curves.easeOutBack,
+                ),
+              ),
           child: Container(
-            margin: const EdgeInsets.only(left: 16, right: 16, top: 0, bottom: 0), // No vertical margin
+            margin: const EdgeInsets.only(
+              left: 16,
+              right: 16,
+              top: 0,
+              bottom: 0,
+            ), // No vertical margin
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -125,9 +132,9 @@ class _FloatingCartBarState extends State<FloatingCartBar>
                     ],
                   ),
                 ),
-                
+
                 const SizedBox(width: 12),
-                
+
                 // Cart text
                 Expanded(
                   child: Column(
@@ -144,20 +151,25 @@ class _FloatingCartBarState extends State<FloatingCartBar>
                       Text(
                         'waiting in your cart',
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onPrimary.withValues(alpha: 0.8),
+                          color: theme.colorScheme.onPrimary.withValues(
+                            alpha: 0.8,
+                          ),
                         ),
                       ),
                     ],
                   ),
                 ),
-                
+
                 const SizedBox(width: 12),
-                
+
                 // Go to Cart button
                 GestureDetector(
                   onTap: () => _navigateToCart(context),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(16),
@@ -171,9 +183,9 @@ class _FloatingCartBarState extends State<FloatingCartBar>
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(width: 8),
-                
+
                 // Close button
                 GestureDetector(
                   onTap: () => _showClearCartDialog(context),
@@ -202,9 +214,7 @@ class _FloatingCartBarState extends State<FloatingCartBar>
   void _navigateToCart(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => const CartPage(),
-      ),
+      MaterialPageRoute(builder: (context) => const CartPage()),
     );
   }
 
@@ -249,10 +259,10 @@ class ClearCartDialog extends StatefulWidget {
   final VoidCallback onCancel;
 
   const ClearCartDialog({
-    Key? key,
+    super.key,
     required this.onConfirm,
     required this.onCancel,
-  }) : super(key: key);
+  });
 
   @override
   State<ClearCartDialog> createState() => _ClearCartDialogState();
@@ -272,21 +282,13 @@ class _ClearCartDialogState extends State<ClearCartDialog>
       vsync: this,
     );
 
-    _scaleAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.elasticOut,
-    ));
+    _scaleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.elasticOut),
+    );
 
-    _opacityAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
+    _opacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
 
     _animationController.forward();
   }
@@ -309,7 +311,9 @@ class _ClearCartDialogState extends State<ClearCartDialog>
             // Blurred background
             Positioned.fill(
               child: Container(
-                color: Colors.black.withValues(alpha: 0.3 * _opacityAnimation.value),
+                color: Colors.black.withValues(
+                  alpha: 0.3 * _opacityAnimation.value,
+                ),
                 child: BackdropFilter(
                   filter: ImageFilter.blur(
                     sigmaX: 5.0 * _opacityAnimation.value,
@@ -323,7 +327,7 @@ class _ClearCartDialogState extends State<ClearCartDialog>
                 ),
               ),
             ),
-            
+
             // Dialog content
             Center(
               child: Transform.scale(
@@ -359,9 +363,9 @@ class _ClearCartDialogState extends State<ClearCartDialog>
                           size: 30,
                         ),
                       ),
-                      
+
                       const SizedBox(height: 16),
-                      
+
                       // Title
                       Text(
                         'Remove Services?',
@@ -371,9 +375,9 @@ class _ClearCartDialogState extends State<ClearCartDialog>
                         ),
                         textAlign: TextAlign.center,
                       ),
-                      
+
                       const SizedBox(height: 8),
-                      
+
                       // Message
                       Text(
                         'Service remove from your cart',
@@ -382,9 +386,9 @@ class _ClearCartDialogState extends State<ClearCartDialog>
                         ),
                         textAlign: TextAlign.center,
                       ),
-                      
+
                       const SizedBox(height: 24),
-                      
+
                       // Buttons
                       Row(
                         children: [
@@ -393,7 +397,9 @@ class _ClearCartDialogState extends State<ClearCartDialog>
                             child: OutlinedButton(
                               onPressed: widget.onCancel,
                               style: OutlinedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 12,
+                                ),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(8),
                                 ),
@@ -410,9 +416,9 @@ class _ClearCartDialogState extends State<ClearCartDialog>
                               ),
                             ),
                           ),
-                          
+
                           const SizedBox(width: 12),
-                          
+
                           // Yes button
                           Expanded(
                             child: ElevatedButton(
@@ -420,16 +426,16 @@ class _ClearCartDialogState extends State<ClearCartDialog>
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.red,
                                 foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 12,
+                                ),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                               ),
                               child: const Text(
                                 'Yes',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w500,
-                                ),
+                                style: TextStyle(fontWeight: FontWeight.w500),
                               ),
                             ),
                           ),

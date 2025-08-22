@@ -1,4 +1,5 @@
 import 'package:injectable/injectable.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../domain/entities/car.dart';
 import '../models/car_model.dart';
@@ -151,6 +152,120 @@ class CarLocalDataSourceImpl implements CarLocalDataSource {
       return _cars.firstWhere((car) => car.id == carId);
     } catch (e) {
       return null;
+    }
+  }
+}
+
+@Injectable(as: CarFirestoreDataSource)
+class CarFirestoreDataSourceImpl implements CarFirestoreDataSource {
+  final FirebaseFirestore _firestore;
+
+  CarFirestoreDataSourceImpl(this._firestore);
+
+  CollectionReference _getCarsCollection(String userId) {
+    return _firestore.collection('users').doc(userId).collection('cars');
+  }
+
+  @override
+  Future<List<CarModel>> getCars(String userId) async {
+    try {
+      final querySnapshot = await _getCarsCollection(userId).get();
+      return querySnapshot.docs
+          .map(
+            (doc) => CarModel.fromFirestore(
+              doc.id,
+              doc.data() as Map<String, dynamic>,
+            ),
+          )
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to get cars: $e');
+    }
+  }
+
+  @override
+  Future<CarModel> addCar(String userId, CarModel car) async {
+    try {
+      final docRef = await _getCarsCollection(userId).add(car.toFirestore());
+      return car.copyWith(id: docRef.id);
+    } catch (e) {
+      throw Exception('Failed to add car: $e');
+    }
+  }
+
+  @override
+  Future<CarModel> updateCar(String userId, CarModel car) async {
+    try {
+      await _getCarsCollection(userId)
+          .doc(car.id)
+          .update(car.copyWith(updatedAt: DateTime.now()).toFirestore());
+      return car.copyWith(updatedAt: DateTime.now());
+    } catch (e) {
+      throw Exception('Failed to update car: $e');
+    }
+  }
+
+  @override
+  Future<void> deleteCar(String userId, String carId) async {
+    try {
+      await _getCarsCollection(userId).doc(carId).delete();
+    } catch (e) {
+      throw Exception('Failed to delete car: $e');
+    }
+  }
+
+  @override
+  Future<void> setDefaultCar(String userId, String carId) async {
+    try {
+      final batch = _firestore.batch();
+      final carsCollection = _getCarsCollection(userId);
+
+      // First, get all cars to unset defaults
+      final querySnapshot = await carsCollection.get();
+
+      for (final doc in querySnapshot.docs) {
+        batch.update(doc.reference, {
+          'isDefault': doc.id == carId,
+          'updatedAt': Timestamp.fromDate(DateTime.now()),
+        });
+      }
+
+      await batch.commit();
+    } catch (e) {
+      throw Exception('Failed to set default car: $e');
+    }
+  }
+
+  @override
+  Future<CarModel?> getDefaultCar(String userId) async {
+    try {
+      final querySnapshot = await _getCarsCollection(
+        userId,
+      ).where('isDefault', isEqualTo: true).limit(1).get();
+
+      if (querySnapshot.docs.isEmpty) {
+        return null;
+      }
+
+      final doc = querySnapshot.docs.first;
+      return CarModel.fromFirestore(doc.id, doc.data() as Map<String, dynamic>);
+    } catch (e) {
+      throw Exception('Failed to get default car: $e');
+    }
+  }
+
+  @override
+  Future<CarModel?> getCarById(String userId, String carId) async {
+    try {
+      final doc = await _getCarsCollection(userId).doc(carId).get();
+
+      if (!doc.exists) {
+        return null;
+      }
+
+      return CarModel.fromFirestore(doc.id, doc.data() as Map<String, dynamic>);
+    } catch (e) {
+      throw Exception('Failed to get car by ID: $e');
     }
   }
 }

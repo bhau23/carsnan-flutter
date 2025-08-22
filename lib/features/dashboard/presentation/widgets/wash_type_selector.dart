@@ -28,15 +28,11 @@ class _WashTypeSelectorState extends State<WashTypeSelector>
       duration: const Duration(milliseconds: 600),
       vsync: this,
     );
-    
-    _slideAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeOutQuart,
-    ));
-    
+
+    _slideAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOutQuart),
+    );
+
     _animationController.forward();
   }
 
@@ -64,20 +60,16 @@ class _WashTypeSelectorState extends State<WashTypeSelector>
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: theme.shadowColor.withOpacity(0.1),
+                    color: theme.shadowColor.withAlpha(50),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
                 ],
-                border: Border.all(
-                  color: theme.dividerColor.withOpacity(0.2),
-                ),
+                border: Border.all(color: theme.dividerColor.withAlpha(76)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildWashTypeOptions(theme),
-                ],
+                children: [_buildWashTypeOptions(theme)],
               ),
             ),
           ),
@@ -99,20 +91,20 @@ class _WashTypeSelectorState extends State<WashTypeSelector>
 
   Widget _buildWashTypeCard(WashType washType, ThemeData theme) {
     final isSelected = widget.selectedWashType == washType;
-    
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isSelected 
-            ? theme.colorScheme.primary 
-            : theme.dividerColor.withOpacity(0.3),
+          color: isSelected
+              ? theme.colorScheme.primary
+              : theme.dividerColor.withAlpha(76),
           width: isSelected ? 2 : 1,
         ),
-        color: isSelected 
-          ? theme.colorScheme.primary.withOpacity(0.05)
-          : Colors.transparent,
+        color: isSelected
+            ? theme.colorScheme.primary.withAlpha(25)
+            : Colors.transparent,
       ),
       child: InkWell(
         onTap: () => widget.onWashTypeChanged(washType),
@@ -128,26 +120,22 @@ class _WashTypeSelectorState extends State<WashTypeSelector>
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: isSelected 
-                      ? theme.colorScheme.primary 
-                      : theme.dividerColor,
+                    color: isSelected
+                        ? theme.colorScheme.primary
+                        : theme.dividerColor,
                     width: 2,
                   ),
-                  color: isSelected 
-                    ? theme.colorScheme.primary 
-                    : Colors.transparent,
+                  color: isSelected
+                      ? theme.colorScheme.primary
+                      : Colors.transparent,
                 ),
                 child: isSelected
-                  ? const Icon(
-                      Icons.check,
-                      color: Colors.white,
-                      size: 16,
-                    )
-                  : null,
+                    ? const Icon(Icons.check, color: Colors.white, size: 16)
+                    : null,
               ),
-              
+
               const SizedBox(width: 16),
-              
+
               // Wash type info
               Expanded(
                 child: Column(
@@ -157,41 +145,41 @@ class _WashTypeSelectorState extends State<WashTypeSelector>
                       washType.displayName,
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w600,
-                        color: isSelected 
-                          ? theme.colorScheme.primary 
-                          : theme.colorScheme.onSurface,
+                        color: isSelected
+                            ? theme.colorScheme.primary
+                            : theme.colorScheme.onSurface,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       _getShortDescription(washType),
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurface.withOpacity(0.6),
+                        color: theme.colorScheme.onSurface.withAlpha(125),
                       ),
                     ),
                   ],
                 ),
               ),
-              
+
               // See more button
               TextButton(
                 onPressed: () => _showWashTypeInfo(washType),
                 style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   minimumSize: Size.zero,
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   foregroundColor: theme.colorScheme.primary,
-                  backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
+                  backgroundColor: theme.colorScheme.primary.withAlpha(25),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
                 child: const Text(
                   'See More',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
                 ),
               ),
             ],

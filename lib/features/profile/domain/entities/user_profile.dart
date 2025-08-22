@@ -1,41 +1,53 @@
 class UserProfile {
-  final String id;
-  final String name;
-  final String email;
-  final String mobile;
-  final String address;
-  final String? avatarUrl;
+  final String uid;
+  final String? email;
+  final String? phoneNumber;
+  final String displayName;
+  final String? photoURL;
+  final String role;
+  final bool isProfileComplete;
+  final DateTime createdAt;
+  final String? address;
   final DateTime? dateOfBirth;
   final String? gender;
 
   const UserProfile({
-    required this.id,
-    required this.name,
-    required this.email,
-    required this.mobile,
-    required this.address,
-    this.avatarUrl,
+    required this.uid,
+    this.email,
+    this.phoneNumber,
+    required this.displayName,
+    this.photoURL,
+    this.role = 'client',
+    this.isProfileComplete = false,
+    required this.createdAt,
+    this.address,
     this.dateOfBirth,
     this.gender,
   });
 
   UserProfile copyWith({
-    String? id,
-    String? name,
+    String? uid,
     String? email,
-    String? mobile,
+    String? phoneNumber,
+    String? displayName,
+    String? photoURL,
+    String? role,
+    bool? isProfileComplete,
+    DateTime? createdAt,
     String? address,
-    String? avatarUrl,
     DateTime? dateOfBirth,
     String? gender,
   }) {
     return UserProfile(
-      id: id ?? this.id,
-      name: name ?? this.name,
+      uid: uid ?? this.uid,
       email: email ?? this.email,
-      mobile: mobile ?? this.mobile,
+      phoneNumber: phoneNumber ?? this.phoneNumber,
+      displayName: displayName ?? this.displayName,
+      photoURL: photoURL ?? this.photoURL,
+      role: role ?? this.role,
+      isProfileComplete: isProfileComplete ?? this.isProfileComplete,
+      createdAt: createdAt ?? this.createdAt,
       address: address ?? this.address,
-      avatarUrl: avatarUrl ?? this.avatarUrl,
       dateOfBirth: dateOfBirth ?? this.dateOfBirth,
       gender: gender ?? this.gender,
     );
@@ -45,25 +57,42 @@ class UserProfile {
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     return other is UserProfile &&
-        other.id == id &&
-        other.name == name &&
+        other.uid == uid &&
         other.email == email &&
-        other.mobile == mobile &&
+        other.phoneNumber == phoneNumber &&
+        other.displayName == displayName &&
+        other.photoURL == photoURL &&
+        other.role == role &&
+        other.isProfileComplete == isProfileComplete &&
+        other.createdAt == createdAt &&
         other.address == address &&
-        other.avatarUrl == avatarUrl &&
         other.dateOfBirth == dateOfBirth &&
         other.gender == gender;
   }
 
   @override
   int get hashCode {
-    return id.hashCode ^
-        name.hashCode ^
+    return uid.hashCode ^
         email.hashCode ^
-        mobile.hashCode ^
+        phoneNumber.hashCode ^
+        displayName.hashCode ^
+        photoURL.hashCode ^
+        role.hashCode ^
+        isProfileComplete.hashCode ^
+        createdAt.hashCode ^
         address.hashCode ^
-        avatarUrl.hashCode ^
         dateOfBirth.hashCode ^
         gender.hashCode;
   }
+
+  @override
+  String toString() {
+    return 'UserProfile(uid: $uid, email: $email, phoneNumber: $phoneNumber, displayName: $displayName, photoURL: $photoURL, role: $role, isProfileComplete: $isProfileComplete, createdAt: $createdAt, address: $address, dateOfBirth: $dateOfBirth, gender: $gender)';
+  }
+
+  // Legacy getters for backward compatibility
+  String get id => uid;
+  String get name => displayName;
+  String get mobile => phoneNumber ?? '';
+  String? get avatarUrl => photoURL;
 }

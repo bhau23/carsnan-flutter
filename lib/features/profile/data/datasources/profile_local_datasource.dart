@@ -1,4 +1,6 @@
 import 'package:injectable/injectable.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 
 import '../models/user_profile_model.dart';
 
@@ -6,6 +8,65 @@ abstract class ProfileLocalDataSource {
   Future<UserProfileModel> getUserProfile(String userId);
   Future<UserProfileModel> updateUserProfile(UserProfileModel profile);
   Future<void> deleteUserProfile(String userId);
+  Future<UserProfileModel> createUserProfile(firebase_auth.User user);
+}
+
+abstract class ProfileFirestoreDataSource {
+  Future<UserProfileModel> getUserProfile(String userId);
+  Future<UserProfileModel> updateUserProfile(UserProfileModel profile);
+  Future<void> deleteUserProfile(String userId);
+  Future<UserProfileModel> createUserProfile(firebase_auth.User user);
+}
+
+@Injectable(as: ProfileFirestoreDataSource)
+class ProfileFirestoreDataSourceImpl implements ProfileFirestoreDataSource {
+  final FirebaseFirestore _firestore;
+
+  ProfileFirestoreDataSourceImpl(this._firestore);
+
+  @override
+  Future<UserProfileModel> createUserProfile(firebase_auth.User user) async {
+    final profile = UserProfileModel.fromFirebaseUser(
+      uid: user.uid,
+      email: user.email,
+      phoneNumber: user.phoneNumber,
+      displayName: user.displayName,
+      photoURL: user.photoURL,
+    );
+
+    await _firestore
+        .collection('users')
+        .doc(user.uid)
+        .set(profile.toJson());
+
+    return profile;
+  }
+
+  @override
+  Future<UserProfileModel> getUserProfile(String userId) async {
+    final doc = await _firestore.collection('users').doc(userId).get();
+    
+    if (!doc.exists) {
+      throw Exception('User profile not found');
+    }
+    
+    return UserProfileModel.fromJson(doc.data()!);
+  }
+
+  @override
+  Future<UserProfileModel> updateUserProfile(UserProfileModel profile) async {
+    await _firestore
+        .collection('users')
+        .doc(profile.uid)
+        .update(profile.toJson());
+    
+    return profile;
+  }
+
+  @override
+  Future<void> deleteUserProfile(String userId) async {
+    await _firestore.collection('users').doc(userId).delete();
+  }
 }
 
 @Injectable(as: ProfileLocalDataSource)
@@ -22,14 +83,17 @@ class ProfileLocalDataSourceImpl implements ProfileLocalDataSource {
     // Return mock data if no profile exists
     if (!_profiles.containsKey(userId)) {
       _profiles[userId] = UserProfileModel(
-        id: userId,
-        name: 'John Doe',
+        uid: userId,
+        displayName: 'John Doe',
         email: 'john.doe@example.com',
-        mobile: '+1 (555) 123-4567',
+        phoneNumber: '+1 (555) 123-4567',
         address: '1234 Golden Street, Premium District, Luxury City, LC 90210',
-        avatarUrl: null,
+        photoURL: null,
         dateOfBirth: DateTime(1992, 3, 15),
         gender: 'Male',
+        role: 'client',
+        isProfileComplete: true,
+        createdAt: DateTime.now().subtract(const Duration(days: 30)),
       );
     }
 
@@ -41,7 +105,7 @@ class ProfileLocalDataSourceImpl implements ProfileLocalDataSource {
     // Simulate network delay
     await Future.delayed(const Duration(milliseconds: 300));
 
-    _profiles[profile.id] = profile;
+    _profiles[profile.uid] = profile;
     return profile;
   }
 
@@ -51,5 +115,22 @@ class ProfileLocalDataSourceImpl implements ProfileLocalDataSource {
     await Future.delayed(const Duration(milliseconds: 200));
 
     _profiles.remove(userId);
+  }
+
+  @override
+  Future<UserProfileModel> createUserProfile(firebase_auth.User user) async {
+    // Simulate network delay
+    await Future.delayed(const Duration(milliseconds: 300));
+
+    final profile = UserProfileModel.fromFirebaseUser(
+      uid: user.uid,
+      email: user.email,
+      phoneNumber: user.phoneNumber,
+      displayName: user.displayName,
+      photoURL: user.photoURL,
+    );
+
+    _profiles[user.uid] = profile;
+    return profile;
   }
 }

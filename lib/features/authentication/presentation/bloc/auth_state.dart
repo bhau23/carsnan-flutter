@@ -12,6 +12,7 @@ class AuthState with _$AuthState {
   const factory AuthState.mfaRequired() = MfaRequired;
   const factory AuthState.mfaEnrolled() = MfaEnrolled;
   const factory AuthState.authenticated({required User user}) = Authenticated;
+  const factory AuthState.profileIncomplete({required User user}) = ProfileIncomplete;
   const factory AuthState.unauthenticated() = Unauthenticated;
   const factory AuthState.error({required String message}) = Error;
 }

@@ -1,5 +1,7 @@
 import 'package:injectable/injectable.dart';
+import 'package:dartz/dartz.dart';
 
+import '../../../../core/errors/failures.dart';
 import '../entities/user_profile.dart';
 import '../repositories/profile_repository.dart';
 
@@ -9,7 +11,14 @@ class GetUserProfileUseCase {
 
   const GetUserProfileUseCase(this.repository);
 
-  Future<UserProfile> call(String userId) async {
-    return await repository.getUserProfile(userId);
+  Future<Either<Failure, UserProfile>> call(String userId) async {
+    try {
+      final result = await repository.getUserProfile(userId);
+      return Right(result);
+    } catch (e) {
+      return Left(
+        GeneralFailure('Failed to get user profile: ${e.toString()}'),
+      );
+    }
   }
 }

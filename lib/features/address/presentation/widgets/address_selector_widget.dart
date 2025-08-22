@@ -13,8 +13,8 @@ class AddressSelector extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<AddressCubit, AddressState>(
       builder: (context, state) {
-        print('AddressSelector state: $state'); // Debug print
-        
+        debugPrint('AddressSelector state: $state'); // Debug print
+
         if (state is AddressLoaded && state.addresses.isNotEmpty) {
           // Show address selector with default address
           final defaultAddress = state.defaultAddress ?? state.addresses.first;
@@ -88,7 +88,9 @@ class _AddressSelectorWidget extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    address.title.isNotEmpty ? address.title : address.shortDisplay,
+                    address.title.isNotEmpty
+                        ? address.title
+                        : address.shortDisplay,
                     style: theme.textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: theme.colorScheme.onSurface,
@@ -252,10 +254,7 @@ class _AddressListBottomSheet extends StatelessWidget {
             ),
             child: Row(
               children: [
-                Icon(
-                  Icons.location_on,
-                  color: theme.colorScheme.primary,
-                ),
+                Icon(Icons.location_on, color: theme.colorScheme.primary),
                 const SizedBox(width: 8),
                 Text(
                   'Select Address',
@@ -290,10 +289,7 @@ class _AddressListBottomSheet extends StatelessWidget {
                         color: theme.colorScheme.primary.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(
-                        Icons.add,
-                        color: theme.colorScheme.primary,
-                      ),
+                      child: Icon(Icons.add, color: theme.colorScheme.primary),
                     ),
                     title: Text(
                       'Add New Address',
@@ -332,7 +328,9 @@ class _AddressListBottomSheet extends StatelessWidget {
                   title: Text(
                     address.title,
                     style: TextStyle(
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                      fontWeight: isSelected
+                          ? FontWeight.bold
+                          : FontWeight.normal,
                       color: isSelected
                           ? theme.colorScheme.primary
                           : theme.colorScheme.onSurface,
@@ -351,7 +349,9 @@ class _AddressListBottomSheet extends StatelessWidget {
                       : null,
                   onTap: () {
                     if (!isSelected) {
-                      context.read<AddressCubit>().setDefaultAddress(address.id);
+                      context.read<AddressCubit>().setDefaultAddress(
+                        address.id,
+                      );
                     }
                     Navigator.of(context).pop();
                   },

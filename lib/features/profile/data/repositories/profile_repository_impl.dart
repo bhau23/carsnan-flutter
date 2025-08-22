@@ -1,4 +1,5 @@
 import 'package:injectable/injectable.dart';
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 
 import '../../domain/entities/user_profile.dart';
 import '../../domain/repositories/profile_repository.dart';
@@ -25,5 +26,18 @@ class ProfileRepositoryImpl implements ProfileRepository {
   @override
   Future<void> deleteUserProfile(String userId) async {
     return await localDataSource.deleteUserProfile(userId);
+  }
+
+  @override
+  Future<UserProfile> createUserProfile(firebase_auth.User user) async {
+    // For local datasource, we'll create a UserProfileModel from Firebase user
+    final profile = UserProfileModel.fromFirebaseUser(
+      uid: user.uid,
+      email: user.email,
+      phoneNumber: user.phoneNumber,
+      displayName: user.displayName,
+      photoURL: user.photoURL,
+    );
+    return await localDataSource.updateUserProfile(profile);
   }
 }

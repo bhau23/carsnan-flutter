@@ -55,7 +55,7 @@ extension AuthEventPatterns on AuthEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( SignInWithEmail value)?  signInWithEmail,TResult Function( SignUpWithEmail value)?  signUpWithEmail,TResult Function( HandleMfaRequired value)?  handleMfaRequired,TResult Function( VerifyMfa value)?  verifyMfa,TResult Function( EnrollMfa value)?  enrollMfa,TResult Function( SendOtp value)?  sendOtp,TResult Function( VerifyOtp value)?  verifyOtp,TResult Function( SignOut value)?  signOut,TResult Function( CheckAuthStatus value)?  checkAuthStatus,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( SignInWithEmail value)?  signInWithEmail,TResult Function( SignUpWithEmail value)?  signUpWithEmail,TResult Function( HandleMfaRequired value)?  handleMfaRequired,TResult Function( VerifyMfa value)?  verifyMfa,TResult Function( EnrollMfa value)?  enrollMfa,TResult Function( SendOtp value)?  sendOtp,TResult Function( VerifyOtp value)?  verifyOtp,TResult Function( CheckProfileCompletion value)?  checkProfileCompletion,TResult Function( CompleteProfile value)?  completeProfile,TResult Function( SignOut value)?  signOut,TResult Function( CheckAuthStatus value)?  checkAuthStatus,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case SignInWithEmail() when signInWithEmail != null:
@@ -65,7 +65,9 @@ return handleMfaRequired(_that);case VerifyMfa() when verifyMfa != null:
 return verifyMfa(_that);case EnrollMfa() when enrollMfa != null:
 return enrollMfa(_that);case SendOtp() when sendOtp != null:
 return sendOtp(_that);case VerifyOtp() when verifyOtp != null:
-return verifyOtp(_that);case SignOut() when signOut != null:
+return verifyOtp(_that);case CheckProfileCompletion() when checkProfileCompletion != null:
+return checkProfileCompletion(_that);case CompleteProfile() when completeProfile != null:
+return completeProfile(_that);case SignOut() when signOut != null:
 return signOut(_that);case CheckAuthStatus() when checkAuthStatus != null:
 return checkAuthStatus(_that);case _:
   return orElse();
@@ -85,7 +87,7 @@ return checkAuthStatus(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( SignInWithEmail value)  signInWithEmail,required TResult Function( SignUpWithEmail value)  signUpWithEmail,required TResult Function( HandleMfaRequired value)  handleMfaRequired,required TResult Function( VerifyMfa value)  verifyMfa,required TResult Function( EnrollMfa value)  enrollMfa,required TResult Function( SendOtp value)  sendOtp,required TResult Function( VerifyOtp value)  verifyOtp,required TResult Function( SignOut value)  signOut,required TResult Function( CheckAuthStatus value)  checkAuthStatus,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( SignInWithEmail value)  signInWithEmail,required TResult Function( SignUpWithEmail value)  signUpWithEmail,required TResult Function( HandleMfaRequired value)  handleMfaRequired,required TResult Function( VerifyMfa value)  verifyMfa,required TResult Function( EnrollMfa value)  enrollMfa,required TResult Function( SendOtp value)  sendOtp,required TResult Function( VerifyOtp value)  verifyOtp,required TResult Function( CheckProfileCompletion value)  checkProfileCompletion,required TResult Function( CompleteProfile value)  completeProfile,required TResult Function( SignOut value)  signOut,required TResult Function( CheckAuthStatus value)  checkAuthStatus,}){
 final _that = this;
 switch (_that) {
 case SignInWithEmail():
@@ -95,7 +97,9 @@ return handleMfaRequired(_that);case VerifyMfa():
 return verifyMfa(_that);case EnrollMfa():
 return enrollMfa(_that);case SendOtp():
 return sendOtp(_that);case VerifyOtp():
-return verifyOtp(_that);case SignOut():
+return verifyOtp(_that);case CheckProfileCompletion():
+return checkProfileCompletion(_that);case CompleteProfile():
+return completeProfile(_that);case SignOut():
 return signOut(_that);case CheckAuthStatus():
 return checkAuthStatus(_that);case _:
   throw StateError('Unexpected subclass');
@@ -114,7 +118,7 @@ return checkAuthStatus(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( SignInWithEmail value)?  signInWithEmail,TResult? Function( SignUpWithEmail value)?  signUpWithEmail,TResult? Function( HandleMfaRequired value)?  handleMfaRequired,TResult? Function( VerifyMfa value)?  verifyMfa,TResult? Function( EnrollMfa value)?  enrollMfa,TResult? Function( SendOtp value)?  sendOtp,TResult? Function( VerifyOtp value)?  verifyOtp,TResult? Function( SignOut value)?  signOut,TResult? Function( CheckAuthStatus value)?  checkAuthStatus,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( SignInWithEmail value)?  signInWithEmail,TResult? Function( SignUpWithEmail value)?  signUpWithEmail,TResult? Function( HandleMfaRequired value)?  handleMfaRequired,TResult? Function( VerifyMfa value)?  verifyMfa,TResult? Function( EnrollMfa value)?  enrollMfa,TResult? Function( SendOtp value)?  sendOtp,TResult? Function( VerifyOtp value)?  verifyOtp,TResult? Function( CheckProfileCompletion value)?  checkProfileCompletion,TResult? Function( CompleteProfile value)?  completeProfile,TResult? Function( SignOut value)?  signOut,TResult? Function( CheckAuthStatus value)?  checkAuthStatus,}){
 final _that = this;
 switch (_that) {
 case SignInWithEmail() when signInWithEmail != null:
@@ -124,7 +128,9 @@ return handleMfaRequired(_that);case VerifyMfa() when verifyMfa != null:
 return verifyMfa(_that);case EnrollMfa() when enrollMfa != null:
 return enrollMfa(_that);case SendOtp() when sendOtp != null:
 return sendOtp(_that);case VerifyOtp() when verifyOtp != null:
-return verifyOtp(_that);case SignOut() when signOut != null:
+return verifyOtp(_that);case CheckProfileCompletion() when checkProfileCompletion != null:
+return checkProfileCompletion(_that);case CompleteProfile() when completeProfile != null:
+return completeProfile(_that);case SignOut() when signOut != null:
 return signOut(_that);case CheckAuthStatus() when checkAuthStatus != null:
 return checkAuthStatus(_that);case _:
   return null;
@@ -143,7 +149,7 @@ return checkAuthStatus(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String email,  String password)?  signInWithEmail,TResult Function( String email,  String password)?  signUpWithEmail,TResult Function( firebase_auth.FirebaseAuthMultiFactorException exception)?  handleMfaRequired,TResult Function( String smsCode)?  verifyMfa,TResult Function( String phoneNumber)?  enrollMfa,TResult Function( String phoneNumber)?  sendOtp,TResult Function( String otp)?  verifyOtp,TResult Function()?  signOut,TResult Function()?  checkAuthStatus,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String email,  String password)?  signInWithEmail,TResult Function( String email,  String password)?  signUpWithEmail,TResult Function( firebase_auth.FirebaseAuthMultiFactorException exception)?  handleMfaRequired,TResult Function( String smsCode)?  verifyMfa,TResult Function( String phoneNumber)?  enrollMfa,TResult Function( String phoneNumber)?  sendOtp,TResult Function( String otp)?  verifyOtp,TResult Function( User user)?  checkProfileCompletion,TResult Function( UserProfile userProfile)?  completeProfile,TResult Function()?  signOut,TResult Function()?  checkAuthStatus,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case SignInWithEmail() when signInWithEmail != null:
 return signInWithEmail(_that.email,_that.password);case SignUpWithEmail() when signUpWithEmail != null:
@@ -152,7 +158,9 @@ return handleMfaRequired(_that.exception);case VerifyMfa() when verifyMfa != nul
 return verifyMfa(_that.smsCode);case EnrollMfa() when enrollMfa != null:
 return enrollMfa(_that.phoneNumber);case SendOtp() when sendOtp != null:
 return sendOtp(_that.phoneNumber);case VerifyOtp() when verifyOtp != null:
-return verifyOtp(_that.otp);case SignOut() when signOut != null:
+return verifyOtp(_that.otp);case CheckProfileCompletion() when checkProfileCompletion != null:
+return checkProfileCompletion(_that.user);case CompleteProfile() when completeProfile != null:
+return completeProfile(_that.userProfile);case SignOut() when signOut != null:
 return signOut();case CheckAuthStatus() when checkAuthStatus != null:
 return checkAuthStatus();case _:
   return orElse();
@@ -172,7 +180,7 @@ return checkAuthStatus();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String email,  String password)  signInWithEmail,required TResult Function( String email,  String password)  signUpWithEmail,required TResult Function( firebase_auth.FirebaseAuthMultiFactorException exception)  handleMfaRequired,required TResult Function( String smsCode)  verifyMfa,required TResult Function( String phoneNumber)  enrollMfa,required TResult Function( String phoneNumber)  sendOtp,required TResult Function( String otp)  verifyOtp,required TResult Function()  signOut,required TResult Function()  checkAuthStatus,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String email,  String password)  signInWithEmail,required TResult Function( String email,  String password)  signUpWithEmail,required TResult Function( firebase_auth.FirebaseAuthMultiFactorException exception)  handleMfaRequired,required TResult Function( String smsCode)  verifyMfa,required TResult Function( String phoneNumber)  enrollMfa,required TResult Function( String phoneNumber)  sendOtp,required TResult Function( String otp)  verifyOtp,required TResult Function( User user)  checkProfileCompletion,required TResult Function( UserProfile userProfile)  completeProfile,required TResult Function()  signOut,required TResult Function()  checkAuthStatus,}) {final _that = this;
 switch (_that) {
 case SignInWithEmail():
 return signInWithEmail(_that.email,_that.password);case SignUpWithEmail():
@@ -181,7 +189,9 @@ return handleMfaRequired(_that.exception);case VerifyMfa():
 return verifyMfa(_that.smsCode);case EnrollMfa():
 return enrollMfa(_that.phoneNumber);case SendOtp():
 return sendOtp(_that.phoneNumber);case VerifyOtp():
-return verifyOtp(_that.otp);case SignOut():
+return verifyOtp(_that.otp);case CheckProfileCompletion():
+return checkProfileCompletion(_that.user);case CompleteProfile():
+return completeProfile(_that.userProfile);case SignOut():
 return signOut();case CheckAuthStatus():
 return checkAuthStatus();case _:
   throw StateError('Unexpected subclass');
@@ -200,7 +210,7 @@ return checkAuthStatus();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String email,  String password)?  signInWithEmail,TResult? Function( String email,  String password)?  signUpWithEmail,TResult? Function( firebase_auth.FirebaseAuthMultiFactorException exception)?  handleMfaRequired,TResult? Function( String smsCode)?  verifyMfa,TResult? Function( String phoneNumber)?  enrollMfa,TResult? Function( String phoneNumber)?  sendOtp,TResult? Function( String otp)?  verifyOtp,TResult? Function()?  signOut,TResult? Function()?  checkAuthStatus,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String email,  String password)?  signInWithEmail,TResult? Function( String email,  String password)?  signUpWithEmail,TResult? Function( firebase_auth.FirebaseAuthMultiFactorException exception)?  handleMfaRequired,TResult? Function( String smsCode)?  verifyMfa,TResult? Function( String phoneNumber)?  enrollMfa,TResult? Function( String phoneNumber)?  sendOtp,TResult? Function( String otp)?  verifyOtp,TResult? Function( User user)?  checkProfileCompletion,TResult? Function( UserProfile userProfile)?  completeProfile,TResult? Function()?  signOut,TResult? Function()?  checkAuthStatus,}) {final _that = this;
 switch (_that) {
 case SignInWithEmail() when signInWithEmail != null:
 return signInWithEmail(_that.email,_that.password);case SignUpWithEmail() when signUpWithEmail != null:
@@ -209,7 +219,9 @@ return handleMfaRequired(_that.exception);case VerifyMfa() when verifyMfa != nul
 return verifyMfa(_that.smsCode);case EnrollMfa() when enrollMfa != null:
 return enrollMfa(_that.phoneNumber);case SendOtp() when sendOtp != null:
 return sendOtp(_that.phoneNumber);case VerifyOtp() when verifyOtp != null:
-return verifyOtp(_that.otp);case SignOut() when signOut != null:
+return verifyOtp(_that.otp);case CheckProfileCompletion() when checkProfileCompletion != null:
+return checkProfileCompletion(_that.user);case CompleteProfile() when completeProfile != null:
+return completeProfile(_that.userProfile);case SignOut() when signOut != null:
 return signOut();case CheckAuthStatus() when checkAuthStatus != null:
 return checkAuthStatus();case _:
   return null;
@@ -679,6 +691,138 @@ class _$VerifyOtpCopyWithImpl<$Res>
   return _then(VerifyOtp(
 otp: null == otp ? _self.otp : otp // ignore: cast_nullable_to_non_nullable
 as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class CheckProfileCompletion implements AuthEvent {
+  const CheckProfileCompletion({required this.user});
+  
+
+ final  User user;
+
+/// Create a copy of AuthEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$CheckProfileCompletionCopyWith<CheckProfileCompletion> get copyWith => _$CheckProfileCompletionCopyWithImpl<CheckProfileCompletion>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CheckProfileCompletion&&(identical(other.user, user) || other.user == user));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,user);
+
+@override
+String toString() {
+  return 'AuthEvent.checkProfileCompletion(user: $user)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $CheckProfileCompletionCopyWith<$Res> implements $AuthEventCopyWith<$Res> {
+  factory $CheckProfileCompletionCopyWith(CheckProfileCompletion value, $Res Function(CheckProfileCompletion) _then) = _$CheckProfileCompletionCopyWithImpl;
+@useResult
+$Res call({
+ User user
+});
+
+
+
+
+}
+/// @nodoc
+class _$CheckProfileCompletionCopyWithImpl<$Res>
+    implements $CheckProfileCompletionCopyWith<$Res> {
+  _$CheckProfileCompletionCopyWithImpl(this._self, this._then);
+
+  final CheckProfileCompletion _self;
+  final $Res Function(CheckProfileCompletion) _then;
+
+/// Create a copy of AuthEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? user = null,}) {
+  return _then(CheckProfileCompletion(
+user: null == user ? _self.user : user // ignore: cast_nullable_to_non_nullable
+as User,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class CompleteProfile implements AuthEvent {
+  const CompleteProfile({required this.userProfile});
+  
+
+ final  UserProfile userProfile;
+
+/// Create a copy of AuthEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$CompleteProfileCopyWith<CompleteProfile> get copyWith => _$CompleteProfileCopyWithImpl<CompleteProfile>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CompleteProfile&&(identical(other.userProfile, userProfile) || other.userProfile == userProfile));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,userProfile);
+
+@override
+String toString() {
+  return 'AuthEvent.completeProfile(userProfile: $userProfile)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $CompleteProfileCopyWith<$Res> implements $AuthEventCopyWith<$Res> {
+  factory $CompleteProfileCopyWith(CompleteProfile value, $Res Function(CompleteProfile) _then) = _$CompleteProfileCopyWithImpl;
+@useResult
+$Res call({
+ UserProfile userProfile
+});
+
+
+
+
+}
+/// @nodoc
+class _$CompleteProfileCopyWithImpl<$Res>
+    implements $CompleteProfileCopyWith<$Res> {
+  _$CompleteProfileCopyWithImpl(this._self, this._then);
+
+  final CompleteProfile _self;
+  final $Res Function(CompleteProfile) _then;
+
+/// Create a copy of AuthEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? userProfile = null,}) {
+  return _then(CompleteProfile(
+userProfile: null == userProfile ? _self.userProfile : userProfile // ignore: cast_nullable_to_non_nullable
+as UserProfile,
   ));
 }
 

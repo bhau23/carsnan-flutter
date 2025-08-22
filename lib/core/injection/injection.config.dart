@@ -9,10 +9,24 @@
 // coverage:ignore-file
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'package:cloud_firestore/cloud_firestore.dart' as _i974;
 import 'package:firebase_auth/firebase_auth.dart' as _i59;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
 
+import '../../features/address/data/datasources/address_local_datasource.dart'
+    as _i1028;
+import '../../features/address/data/repositories/address_repository_impl.dart'
+    as _i590;
+import '../../features/address/domain/repositories/address_repository.dart'
+    as _i463;
+import '../../features/address/domain/usecases/add_address_usecase.dart'
+    as _i149;
+import '../../features/address/domain/usecases/get_addresses_usecase.dart'
+    as _i102;
+import '../../features/address/domain/usecases/set_default_address_usecase.dart'
+    as _i135;
+import '../../features/address/presentation/cubit/address_cubit.dart' as _i1056;
 import '../../features/authentication/data/datasources/auth_remote_data_source.dart'
     as _i943;
 import '../../features/authentication/data/datasources/auth_remote_data_source_impl.dart'
@@ -83,6 +97,9 @@ import '../../features/profile/domain/usecases/get_user_profile_usecase.dart'
 import '../../features/profile/domain/usecases/update_user_profile_usecase.dart'
     as _i103;
 import '../di/firebase_module.dart' as _i909;
+import '../services/dynamic_pricing_service.dart' as _i485;
+import '../services/location_service.dart' as _i669;
+import '../services/vehicle_selection_service.dart' as _i143;
 
 extension GetItInjectableX on _i174.GetIt {
   // initializes the registration of main-scope dependencies inside of GetIt
@@ -92,7 +109,17 @@ extension GetItInjectableX on _i174.GetIt {
   }) {
     final gh = _i526.GetItHelper(this, environment, environmentFilter);
     final firebaseModule = _$FirebaseModule();
+    gh.factory<_i485.DynamicPricingService>(
+      () => _i485.DynamicPricingService(),
+    );
+    gh.factory<_i669.LocationService>(() => _i669.LocationService());
+    gh.singleton<_i143.VehicleSelectionService>(
+      () => _i143.VehicleSelectionService(),
+    );
     gh.lazySingleton<_i59.FirebaseAuth>(() => firebaseModule.firebaseAuth);
+    gh.lazySingleton<_i974.FirebaseFirestore>(
+      () => firebaseModule.firebaseFirestore,
+    );
     gh.factory<_i183.ServiceLocalDataSource>(
       () => _i183.ServiceLocalDataSourceImpl(),
     );
@@ -100,8 +127,8 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i1046.ProfileLocalDataSourceImpl(),
     );
     gh.factory<_i171.CarLocalDataSource>(() => _i139.CarLocalDataSourceImpl());
-    gh.factory<_i222.CarRepository>(
-      () => _i746.CarRepositoryImpl(gh<_i171.CarLocalDataSource>()),
+    gh.factory<_i1028.AddressLocalDataSource>(
+      () => _i1028.AddressLocalDataSourceImpl(),
     );
     gh.factory<_i339.CartLocalDataSource>(
       () => _i823.CartLocalDataSourceImpl(
@@ -109,32 +136,25 @@ extension GetItInjectableX on _i174.GetIt {
         carDataSource: gh<_i171.CarLocalDataSource>(),
       ),
     );
+    gh.factory<_i1028.AddressFirestoreDataSource>(
+      () =>
+          _i1028.AddressFirestoreDataSourceImpl(gh<_i974.FirebaseFirestore>()),
+    );
     gh.factory<_i943.AuthRemoteDataSource>(
       () => _i1068.AuthRemoteDataSourceImpl(gh<_i59.FirebaseAuth>()),
+    );
+    gh.factory<_i1046.ProfileFirestoreDataSource>(
+      () =>
+          _i1046.ProfileFirestoreDataSourceImpl(gh<_i974.FirebaseFirestore>()),
     );
     gh.factory<_i742.AuthRepository>(
       () => _i317.AuthRepositoryImpl(gh<_i943.AuthRemoteDataSource>()),
     );
+    gh.factory<_i171.CarFirestoreDataSource>(
+      () => _i139.CarFirestoreDataSourceImpl(gh<_i974.FirebaseFirestore>()),
+    );
     gh.factory<_i894.ProfileRepository>(
       () => _i334.ProfileRepositoryImpl(gh<_i1046.ProfileLocalDataSource>()),
-    );
-    gh.factory<_i64.AddCarUseCase>(
-      () => _i64.AddCarUseCase(gh<_i222.CarRepository>()),
-    );
-    gh.factory<_i62.DeleteCarUseCase>(
-      () => _i62.DeleteCarUseCase(gh<_i222.CarRepository>()),
-    );
-    gh.factory<_i888.GetCarsUseCase>(
-      () => _i888.GetCarsUseCase(gh<_i222.CarRepository>()),
-    );
-    gh.factory<_i669.GetDefaultCarUseCase>(
-      () => _i669.GetDefaultCarUseCase(gh<_i222.CarRepository>()),
-    );
-    gh.factory<_i916.SetDefaultCarUseCase>(
-      () => _i916.SetDefaultCarUseCase(gh<_i222.CarRepository>()),
-    );
-    gh.factory<_i554.UpdateCarUseCase>(
-      () => _i554.UpdateCarUseCase(gh<_i222.CarRepository>()),
     );
     gh.factory<_i514.EnrollMfaUseCase>(
       () => _i514.EnrollMfaUseCase(gh<_i742.AuthRepository>()),
@@ -148,11 +168,21 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i348.VerifyMfaUseCase>(
       () => _i348.VerifyMfaUseCase(gh<_i742.AuthRepository>()),
     );
+    gh.factory<_i463.AddressRepository>(
+      () => _i590.AddressRepositoryImpl(
+        gh<_i1028.AddressLocalDataSource>(),
+        gh<_i1028.AddressFirestoreDataSource>(),
+        gh<_i59.FirebaseAuth>(),
+      ),
+    );
     gh.factory<_i146.GetUserProfileUseCase>(
       () => _i146.GetUserProfileUseCase(gh<_i894.ProfileRepository>()),
     );
     gh.factory<_i103.UpdateUserProfileUseCase>(
       () => _i103.UpdateUserProfileUseCase(gh<_i894.ProfileRepository>()),
+    );
+    gh.factory<_i103.CreateUserProfileUseCase>(
+      () => _i103.CreateUserProfileUseCase(gh<_i894.ProfileRepository>()),
     );
     gh.factory<_i244.GetAuthStateChangesUseCase>(
       () => _i244.GetAuthStateChangesUseCase(gh<_i742.AuthRepository>()),
@@ -183,15 +213,16 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i1050.SignUpWithEmailUseCase>(),
         gh<_i514.EnrollMfaUseCase>(),
         gh<_i348.VerifyMfaUseCase>(),
+        gh<_i146.GetUserProfileUseCase>(),
+        gh<_i103.CreateUserProfileUseCase>(),
+        gh<_i103.UpdateUserProfileUseCase>(),
       ),
     );
-    gh.factory<_i313.CarCubit>(
-      () => _i313.CarCubit(
-        gh<_i888.GetCarsUseCase>(),
-        gh<_i64.AddCarUseCase>(),
-        gh<_i554.UpdateCarUseCase>(),
-        gh<_i62.DeleteCarUseCase>(),
-        gh<_i916.SetDefaultCarUseCase>(),
+    gh.factory<_i222.CarRepository>(
+      () => _i746.CarRepositoryImpl(
+        gh<_i171.CarLocalDataSource>(),
+        gh<_i171.CarFirestoreDataSource>(),
+        gh<_i59.FirebaseAuth>(),
       ),
     );
     gh.factory<_i659.AddToCartUseCase>(
@@ -209,6 +240,33 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i352.WatchCartUseCase>(
       () => _i352.WatchCartUseCase(gh<_i322.CartRepository>()),
     );
+    gh.factory<_i64.AddCarUseCase>(
+      () => _i64.AddCarUseCase(gh<_i222.CarRepository>()),
+    );
+    gh.factory<_i62.DeleteCarUseCase>(
+      () => _i62.DeleteCarUseCase(gh<_i222.CarRepository>()),
+    );
+    gh.factory<_i888.GetCarsUseCase>(
+      () => _i888.GetCarsUseCase(gh<_i222.CarRepository>()),
+    );
+    gh.factory<_i669.GetDefaultCarUseCase>(
+      () => _i669.GetDefaultCarUseCase(gh<_i222.CarRepository>()),
+    );
+    gh.factory<_i916.SetDefaultCarUseCase>(
+      () => _i916.SetDefaultCarUseCase(gh<_i222.CarRepository>()),
+    );
+    gh.factory<_i554.UpdateCarUseCase>(
+      () => _i554.UpdateCarUseCase(gh<_i222.CarRepository>()),
+    );
+    gh.factory<_i149.AddAddressUseCase>(
+      () => _i149.AddAddressUseCase(gh<_i463.AddressRepository>()),
+    );
+    gh.factory<_i102.GetAddressesUseCase>(
+      () => _i102.GetAddressesUseCase(gh<_i463.AddressRepository>()),
+    );
+    gh.factory<_i135.SetDefaultAddressUseCase>(
+      () => _i135.SetDefaultAddressUseCase(gh<_i463.AddressRepository>()),
+    );
     gh.factory<_i499.CartCubit>(
       () => _i499.CartCubit(
         addToCartUseCase: gh<_i659.AddToCartUseCase>(),
@@ -216,6 +274,23 @@ extension GetItInjectableX on _i174.GetIt {
         removeFromCartUseCase: gh<_i355.RemoveFromCartUseCase>(),
         clearCartUseCase: gh<_i240.ClearCartUseCase>(),
         watchCartUseCase: gh<_i352.WatchCartUseCase>(),
+      ),
+    );
+    gh.factory<_i313.CarCubit>(
+      () => _i313.CarCubit(
+        gh<_i888.GetCarsUseCase>(),
+        gh<_i64.AddCarUseCase>(),
+        gh<_i554.UpdateCarUseCase>(),
+        gh<_i62.DeleteCarUseCase>(),
+        gh<_i916.SetDefaultCarUseCase>(),
+      ),
+    );
+    gh.factory<_i1056.AddressCubit>(
+      () => _i1056.AddressCubit(
+        getAddressesUseCase: gh<_i102.GetAddressesUseCase>(),
+        addAddressUseCase: gh<_i149.AddAddressUseCase>(),
+        setDefaultAddressUseCase: gh<_i135.SetDefaultAddressUseCase>(),
+        locationService: gh<_i669.LocationService>(),
       ),
     );
     return this;

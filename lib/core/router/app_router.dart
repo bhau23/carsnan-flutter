@@ -26,11 +26,11 @@ class AppRouter {
         builder: (BuildContext context, GoRouterState state) =>
             const DashboardPage(),
       ),
-      // Primary authentication route - now uses email/password
+      // Primary authentication route - unified login page
       GoRoute(
         path: '/login',
         builder: (BuildContext context, GoRouterState state) =>
-            const EmailAuthenticationPage(),
+            const LoginPage(),
       ),
       // MFA verification route
       GoRoute(
@@ -49,6 +49,12 @@ class AppRouter {
         path: '/otp',
         builder: (BuildContext context, GoRouterState state) =>
             const OtpVerificationPage(),
+      ),
+      // Complete profile route for new user onboarding
+      GoRoute(
+        path: '/complete-profile',
+        builder: (BuildContext context, GoRouterState state) =>
+            const CompleteProfilePage(),
       ),
       // Car management routes
       GoRoute(
@@ -85,6 +91,11 @@ class AppRouter {
         orElse: () => false,
       );
 
+      final bool profileIncomplete = authBloc.state.maybeWhen(
+        profileIncomplete: (user) => true,
+        orElse: () => false,
+      );
+
       final bool mfaRequired = authBloc.state.maybeWhen(
         mfaRequired: () => true,
         orElse: () => false,
@@ -94,14 +105,20 @@ class AppRouter {
       final bool inMfaFlow = state.matchedLocation == '/mfa';
       final bool usingPhoneAuth = state.matchedLocation == '/phone-auth';
       final bool inOtpFlow = state.matchedLocation == '/otp';
+      final bool inCompleteProfile = state.matchedLocation == '/complete-profile';
+
+      // If profile is incomplete, redirect to complete profile page
+      if (profileIncomplete && !inCompleteProfile) {
+        return '/complete-profile';
+      }
 
       // If MFA is required, redirect to MFA page
       if (mfaRequired && !inMfaFlow) {
         return '/mfa';
       }
 
-      // If not logged in and MFA not required, allow access to auth pages
-      if (!loggedIn && !mfaRequired) {
+      // If not logged in and MFA not required and profile not incomplete, allow access to auth pages
+      if (!loggedIn && !mfaRequired && !profileIncomplete) {
         // Allow access to login, phone-auth, and otp pages
         if (loggingIn || usingPhoneAuth || inOtpFlow) {
           return null;

@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:injectable/injectable.dart';
 import '../../../../core/errors/failures.dart';
 
 class LocationResult {
@@ -24,6 +25,7 @@ class LocationResult {
   });
 }
 
+@injectable
 class LocationService {
   Future<Either<Failure, LocationResult>> getCurrentLocation() async {
     try {
@@ -54,14 +56,18 @@ class LocationService {
 
       return addressResult.fold(
         (failure) => Left(failure),
-        (address) => Right(LocationResult(
-          latitude: position.latitude,
-          longitude: position.longitude,
-          address: address,
-        )),
+        (address) => Right(
+          LocationResult(
+            latitude: position.latitude,
+            longitude: position.longitude,
+            address: address,
+          ),
+        ),
       );
     } catch (e) {
-      return Left(GeneralFailure('Failed to get current location: ${e.toString()}'));
+      return Left(
+        GeneralFailure('Failed to get current location: ${e.toString()}'),
+      );
     }
   }
 
@@ -116,28 +122,33 @@ class LocationService {
       }
 
       List<Location> locations = await locationFromAddress(query);
-      
+
       List<LocationResult> results = [];
-      
-      for (Location location in locations.take(5)) { // Limit to 5 results
+
+      for (Location location in locations.take(5)) {
+        // Limit to 5 results
         final addressResult = await getAddressFromCoordinates(
           location.latitude,
           location.longitude,
         );
-        
+
         addressResult.fold(
           (failure) => null,
-          (address) => results.add(LocationResult(
-            latitude: location.latitude,
-            longitude: location.longitude,
-            address: address,
-          )),
+          (address) => results.add(
+            LocationResult(
+              latitude: location.latitude,
+              longitude: location.longitude,
+              address: address,
+            ),
+          ),
         );
       }
 
       return Right(results);
     } catch (e) {
-      return Left(GeneralFailure('Failed to search addresses: ${e.toString()}'));
+      return Left(
+        GeneralFailure('Failed to search addresses: ${e.toString()}'),
+      );
     }
   }
 }

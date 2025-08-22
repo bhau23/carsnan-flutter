@@ -116,7 +116,7 @@ class ProfileHeader extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               Text(
-                profile.name,
+                profile.displayName,
                 style: theme.textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                   letterSpacing: 0.5,
