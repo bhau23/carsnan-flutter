@@ -23,3 +23,27 @@ abstract class CartRepository {
   /// Get cart items stream for reactive updates
   Stream<Cart> watchCart();
 }
+
+/// Repository interface for booking operations
+abstract class BookingRepository {
+  /// Create a new booking from cart items
+  Future<Booking> createBooking({
+    required String userId,
+    required List<CartItem> items,
+    required double totalPrice,
+    String? paymentId,
+    String? notes,
+  });
+
+  /// Get all bookings for a user
+  Future<List<Booking>> getUserBookings(String userId);
+
+  /// Get a specific booking by ID
+  Future<Booking?> getBookingById(String bookingId);
+
+  /// Update booking status
+  Future<void> updateBookingStatus(String bookingId, BookingStatus status);
+
+  /// Get bookings stream for reactive updates
+  Stream<List<Booking>> watchUserBookings(String userId);
+}

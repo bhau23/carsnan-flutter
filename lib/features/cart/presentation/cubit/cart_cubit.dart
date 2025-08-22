@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
+import '../../../../core/models/time_slot.dart';
 import '../../domain/entities/cart.dart';
 import '../../domain/usecases/add_to_cart_usecase.dart';
 import '../../domain/usecases/get_cart_usecase.dart';
@@ -56,7 +57,11 @@ class CartCubit extends Cubit<CartState> {
   }
 
   /// Add service+car combination to cart
-  Future<void> addToCart({required Service service, required Car car}) async {
+  Future<void> addToCart({
+    required Service service,
+    required Car car,
+    TimeSlot? timeSlot,
+  }) async {
     emit(state.copyWith(isLoading: true, error: null));
 
     try {
@@ -66,6 +71,7 @@ class CartCubit extends Cubit<CartState> {
         service: service,
         car: car,
         addedAt: DateTime.now(),
+        timeSlot: timeSlot,
       );
 
       await addToCartUseCase(cartItem);

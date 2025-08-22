@@ -130,6 +130,20 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i1028.AddressLocalDataSource>(
       () => _i1028.AddressLocalDataSourceImpl(),
     );
+    gh.factory<_i339.BookingFirestoreDataSource>(
+      () => _i823.BookingFirestoreDataSourceImpl(
+        gh<_i974.FirebaseFirestore>(),
+        serviceDataSource: gh<_i183.ServiceLocalDataSource>(),
+        carDataSource: gh<_i171.CarLocalDataSource>(),
+      ),
+    );
+    gh.factory<_i339.CartFirestoreDataSource>(
+      () => _i823.CartFirestoreDataSourceImpl(
+        gh<_i974.FirebaseFirestore>(),
+        serviceDataSource: gh<_i183.ServiceLocalDataSource>(),
+        carDataSource: gh<_i171.CarLocalDataSource>(),
+      ),
+    );
     gh.factory<_i339.CartLocalDataSource>(
       () => _i823.CartLocalDataSourceImpl(
         serviceDataSource: gh<_i183.ServiceLocalDataSource>(),
@@ -156,6 +170,13 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i894.ProfileRepository>(
       () => _i334.ProfileRepositoryImpl(gh<_i1046.ProfileLocalDataSource>()),
     );
+    gh.factory<_i322.CartRepository>(
+      () => _i642.CartRepositoryImpl(
+        localDataSource: gh<_i339.CartLocalDataSource>(),
+        firestoreDataSource: gh<_i339.CartFirestoreDataSource>(),
+        firebaseAuth: gh<_i59.FirebaseAuth>(),
+      ),
+    );
     gh.factory<_i514.EnrollMfaUseCase>(
       () => _i514.EnrollMfaUseCase(gh<_i742.AuthRepository>()),
     );
@@ -168,6 +189,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i348.VerifyMfaUseCase>(
       () => _i348.VerifyMfaUseCase(gh<_i742.AuthRepository>()),
     );
+    gh.factory<_i322.BookingRepository>(
+      () => _i642.BookingRepositoryImpl(
+        bookingDataSource: gh<_i339.BookingFirestoreDataSource>(),
+        firebaseAuth: gh<_i59.FirebaseAuth>(),
+      ),
+    );
     gh.factory<_i463.AddressRepository>(
       () => _i590.AddressRepositoryImpl(
         gh<_i1028.AddressLocalDataSource>(),
@@ -177,6 +204,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i146.GetUserProfileUseCase>(
       () => _i146.GetUserProfileUseCase(gh<_i894.ProfileRepository>()),
+    );
+    gh.factory<_i146.CheckProfileCompletionUseCase>(
+      () => _i146.CheckProfileCompletionUseCase(gh<_i894.ProfileRepository>()),
     );
     gh.factory<_i103.UpdateUserProfileUseCase>(
       () => _i103.UpdateUserProfileUseCase(gh<_i894.ProfileRepository>()),
@@ -198,10 +228,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i173.VerifyOtpUseCase>(
       () => _i173.VerifyOtpUseCase(gh<_i742.AuthRepository>()),
-    );
-    gh.factory<_i322.CartRepository>(
-      () =>
-          _i642.CartRepositoryImpl(dataSource: gh<_i339.CartLocalDataSource>()),
     );
     gh.factory<_i180.AuthBloc>(
       () => _i180.AuthBloc(
@@ -240,6 +266,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i352.WatchCartUseCase>(
       () => _i352.WatchCartUseCase(gh<_i322.CartRepository>()),
     );
+    gh.factory<_i659.CreateBookingUseCase>(
+      () => _i659.CreateBookingUseCase(
+        bookingRepository: gh<_i322.BookingRepository>(),
+        cartRepository: gh<_i322.CartRepository>(),
+      ),
+    );
     gh.factory<_i64.AddCarUseCase>(
       () => _i64.AddCarUseCase(gh<_i222.CarRepository>()),
     );
@@ -266,6 +298,13 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i135.SetDefaultAddressUseCase>(
       () => _i135.SetDefaultAddressUseCase(gh<_i463.AddressRepository>()),
+    );
+    gh.factory<_i659.CheckoutUseCase>(
+      () => _i659.CheckoutUseCase(
+        checkProfileUseCase: gh<_i146.CheckProfileCompletionUseCase>(),
+        createBookingUseCase: gh<_i659.CreateBookingUseCase>(),
+        cartRepository: gh<_i322.CartRepository>(),
+      ),
     );
     gh.factory<_i499.CartCubit>(
       () => _i499.CartCubit(

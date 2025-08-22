@@ -512,12 +512,12 @@ class _TimeSlotSelectionPageState extends State<TimeSlotSelectionPage>
 
             const SizedBox(width: 16),
 
-            // Right side - Checkout button
+            // Right side - Add to Cart button
             Expanded(
               flex: 3,
               child: ElevatedButton(
                 onPressed: _selectedSlot != null
-                    ? () => _proceedToCheckout(context)
+                    ? () => _addToCart(context)
                     : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: theme.colorScheme.primary,
@@ -534,7 +534,7 @@ class _TimeSlotSelectionPageState extends State<TimeSlotSelectionPage>
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Checkout',
+                      'Add to Cart',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -545,7 +545,7 @@ class _TimeSlotSelectionPageState extends State<TimeSlotSelectionPage>
                     ),
                     const SizedBox(width: 8),
                     Icon(
-                      Icons.arrow_forward,
+                      Icons.shopping_cart_outlined,
                       color: _selectedSlot != null
                           ? theme.colorScheme.onPrimary
                           : theme.colorScheme.onSurfaceVariant,
@@ -560,13 +560,17 @@ class _TimeSlotSelectionPageState extends State<TimeSlotSelectionPage>
     );
   }
 
-  void _proceedToCheckout(BuildContext context) async {
+  void _addToCart(BuildContext context) async {
     if (_selectedSlot == null) return;
 
     final cartCubit = context.read<CartCubit>();
 
     try {
-      await cartCubit.addToCart(service: widget.service, car: widget.car);
+      await cartCubit.addToCart(
+        service: widget.service,
+        car: widget.car,
+        timeSlot: _selectedSlot, // Pass the selected time slot
+      );
 
       if (context.mounted) {
         // Navigate back to home and show success
@@ -575,7 +579,7 @@ class _TimeSlotSelectionPageState extends State<TimeSlotSelectionPage>
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              '${widget.service.title} scheduled for ${_selectedSlot!.dayLabel} ${_selectedSlot!.timeRange}',
+              '${widget.service.title} scheduled for ${_selectedSlot!.dayLabel} ${_selectedSlot!.timeRange} added to cart!',
             ),
             behavior: SnackBarBehavior.floating,
             backgroundColor: Colors.green,
@@ -585,6 +589,14 @@ class _TimeSlotSelectionPageState extends State<TimeSlotSelectionPage>
               left: 16,
               right: 16,
             ),
+            action: SnackBarAction(
+              label: 'View Cart',
+              textColor: Colors.white,
+              onPressed: () {
+                // Navigate to cart page
+                Navigator.pushNamed(context, '/cart');
+              },
+            ),
           ),
         );
       }
@@ -592,7 +604,7 @@ class _TimeSlotSelectionPageState extends State<TimeSlotSelectionPage>
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to schedule service: $e'),
+            content: Text('Failed to add to cart: $e'),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
             margin: const EdgeInsets.only(

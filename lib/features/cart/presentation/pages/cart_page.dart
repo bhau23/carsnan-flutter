@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/services/addon_service.dart';
+import '../../../../core/di/injection.dart';
+import '../../domain/entities/cart.dart';
+import '../../domain/usecases/add_to_cart_usecase.dart';
 import '../cubit/cart_cubit.dart';
 import '../cubit/cart_state.dart';
 import '../widgets/cart_item_widget.dart';
@@ -18,6 +21,7 @@ class CartPage extends StatefulWidget {
 class _CartPageState extends State<CartPage> {
   final AddonService _addonService = AddonService();
   final Map<String, int> _addonQuantities = {};
+  bool _isCheckoutLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -109,8 +113,9 @@ class _CartPageState extends State<CartPage> {
                           final item = state.cart.items[index];
                           return CartItemWidget(
                             cartItem: item,
-                            onRemove: () =>
-                                context.read<CartCubit>().removeFromCart(item.id),
+                            onRemove: () => context
+                                .read<CartCubit>()
+                                .removeFromCart(item.id),
                           );
                         },
                       ),
@@ -226,7 +231,9 @@ class _CartPageState extends State<CartPage> {
 
             // Checkout button
             ElevatedButton(
-              onPressed: () => _proceedToCheckout(context),
+              onPressed: _isCheckoutLoading
+                  ? null
+                  : () => _proceedToCheckout(context),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFFD4AF37),
                 foregroundColor: Colors.black,
@@ -234,14 +241,33 @@ class _CartPageState extends State<CartPage> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
+                disabledBackgroundColor: Colors.grey.withValues(alpha: 0.3),
               ),
-              child: Text(
-                'Proceed to Checkout',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
+              child: _isCheckoutLoading
+                  ? Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.black,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        const Text('Processing...'),
+                      ],
+                    )
+                  : Text(
+                      'Proceed to Checkout',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
             ),
           ],
         ),
@@ -295,7 +321,7 @@ class _CartPageState extends State<CartPage> {
 
   Widget _buildAddonsSection(BuildContext context, ThemeData theme) {
     final availableAddons = _addonService.getAllAddons();
-    
+
     return Container(
       margin: const EdgeInsets.all(16),
       child: Column(
@@ -326,7 +352,10 @@ class _CartPageState extends State<CartPage> {
               ),
               if (_getTotalAddonsCount() > 0)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: theme.colorScheme.primary,
                     borderRadius: BorderRadius.circular(12),
@@ -342,9 +371,9 @@ class _CartPageState extends State<CartPage> {
                 ),
             ],
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // Horizontal scrollable addon products
           SizedBox(
             height: 200,
@@ -354,7 +383,7 @@ class _CartPageState extends State<CartPage> {
               itemBuilder: (context, index) {
                 final addon = availableAddons[index];
                 final quantity = _addonQuantities[addon.id] ?? 0;
-                
+
                 return AddonProductCard(
                   product: addon,
                   quantity: quantity,
@@ -427,12 +456,200 @@ class _CartPageState extends State<CartPage> {
     );
   }
 
-  void _proceedToCheckout(BuildContext context) {
-    // TODO: Implement checkout flow
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Checkout feature coming soon!'),
-        behavior: SnackBarBehavior.floating,
+  void _proceedToCheckout(BuildContext context) async {
+    if (_isCheckoutLoading) return;
+
+    setState(() {
+      _isCheckoutLoading = true;
+    });
+
+    try {
+      final checkoutUseCase = getIt<CheckoutUseCase>();
+
+      // For demo purposes, using a fixed user ID
+      // In a real app, this would come from the authentication service
+      const String userId = 'demo_user_123';
+
+      final result = await checkoutUseCase(
+        userId: userId,
+        notes: 'Booking created from cart checkout',
+        simulatePaymentFailure: false, // Change to true to test payment failure
+      );
+
+      if (context.mounted) {
+        if (result.isSuccess) {
+          _showCheckoutSuccessDialog(context, result.booking!);
+        } else {
+          _showCheckoutErrorDialog(context, result);
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Checkout failed: ${e.toString()}'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isCheckoutLoading = false;
+        });
+      }
+    }
+  }
+
+  void _showCheckoutSuccessDialog(BuildContext context, Booking booking) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Success icon
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: Colors.green,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.check, color: Colors.white, size: 40),
+            ),
+            const SizedBox(height: 20),
+
+            Text(
+              'Booking Confirmed!',
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+
+            Text(
+              'Your booking has been created successfully.',
+              style: Theme.of(context).textTheme.bodyMedium,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.grey.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                children: [
+                  _buildBookingDetailRow('Booking ID:', booking.id),
+                  _buildBookingDetailRow(
+                    'Status:',
+                    booking.status.name.toUpperCase(),
+                  ),
+                  _buildBookingDetailRow(
+                    'Total:',
+                    '\$${booking.totalPrice.toStringAsFixed(2)}',
+                  ),
+                  _buildBookingDetailRow(
+                    'Services:',
+                    '${booking.items.length} item(s)',
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              Navigator.of(context).pop(); // Go back to dashboard
+            },
+            child: const Text('Continue'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showCheckoutErrorDialog(BuildContext context, CheckoutResult result) {
+    String title = 'Checkout Failed';
+    String message = result.message ?? 'An unknown error occurred.';
+
+    // Customize message based on failure reason
+    switch (result.failureReason) {
+      case CheckoutFailureReason.emptyCart:
+        title = 'Empty Cart';
+        message = 'Please add items to your cart before checkout.';
+        break;
+      case CheckoutFailureReason.incompleteProfile:
+        title = 'Profile Incomplete';
+        message = 'Please complete your profile to proceed with checkout.';
+        break;
+      case CheckoutFailureReason.paymentFailed:
+        title = 'Payment Failed';
+        message =
+            result.message ?? 'Payment processing failed. Please try again.';
+        break;
+      case CheckoutFailureReason.networkError:
+        title = 'Network Error';
+        message = 'Please check your internet connection and try again.';
+        break;
+      case CheckoutFailureReason.unknownError:
+      case null:
+        title = 'Error';
+        message = result.message ?? 'An unexpected error occurred.';
+        break;
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            Icon(Icons.error_outline, color: Colors.red),
+            const SizedBox(width: 8),
+            Text(title),
+          ],
+        ),
+        content: Text(message),
+        actions: [
+          if (result.failureReason ==
+              CheckoutFailureReason.incompleteProfile) ...[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                // Navigate to profile page
+                context.push('/profile');
+              },
+              child: const Text('Complete Profile'),
+            ),
+          ],
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBookingDetailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
+          Text(value),
+        ],
       ),
     );
   }

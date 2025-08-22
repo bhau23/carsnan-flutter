@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'package:injectable/injectable.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../../core/models/time_slot.dart';
 import '../../../dashboard/data/datasources/service_local_datasource.dart';
 import '../../../car/data/datasources/car_local_data_source.dart';
 import '../../../dashboard/domain/entities/service.dart';
@@ -120,5 +122,352 @@ class CartLocalDataSourceImpl implements CartLocalDataSource {
   /// Dispose method to close stream controller
   void dispose() {
     _cartStreamController.close();
+  }
+}
+
+@Injectable(as: CartFirestoreDataSource)
+class CartFirestoreDataSourceImpl implements CartFirestoreDataSource {
+  final FirebaseFirestore _firestore;
+  final ServiceLocalDataSource serviceDataSource;
+  final CarLocalDataSource carDataSource;
+
+  CartFirestoreDataSourceImpl(
+    this._firestore, {
+    required this.serviceDataSource,
+    required this.carDataSource,
+  });
+
+  /// Get the cart collection reference for a user
+  CollectionReference _getCartCollection(String userId) {
+    return _firestore.collection('users').doc(userId).collection('cart');
+  }
+
+  @override
+  Future<Cart> getCart(String userId) async {
+    try {
+      final querySnapshot = await _getCartCollection(userId).get();
+      final cartItems = <CartItem>[];
+
+      for (final doc in querySnapshot.docs) {
+        final data = doc.data() as Map<String, dynamic>;
+        final cartItem = await _mapToCartItem(doc.id, data);
+        if (cartItem != null) {
+          cartItems.add(cartItem);
+        }
+      }
+
+      return Cart(items: cartItems);
+    } catch (e) {
+      throw Exception('Failed to get cart: $e');
+    }
+  }
+
+  @override
+  Future<void> addItem(String userId, CartItem item) async {
+    try {
+      final cartData = {
+        'serviceId': item.service.id,
+        'carId': item.car.id,
+        'addedAt': item.addedAt.toIso8601String(),
+        'timeSlot': item.timeSlot?.toMap(),
+        'price': item.finalPrice,
+      };
+
+      await _getCartCollection(userId).doc(item.id).set(cartData);
+    } catch (e) {
+      throw Exception('Failed to add cart item: $e');
+    }
+  }
+
+  @override
+  Future<void> removeItem(String userId, String itemId) async {
+    try {
+      await _getCartCollection(userId).doc(itemId).delete();
+    } catch (e) {
+      throw Exception('Failed to remove cart item: $e');
+    }
+  }
+
+  @override
+  Future<void> clearCart(String userId) async {
+    try {
+      final batch = _firestore.batch();
+      final querySnapshot = await _getCartCollection(userId).get();
+
+      for (final doc in querySnapshot.docs) {
+        batch.delete(doc.reference);
+      }
+
+      await batch.commit();
+    } catch (e) {
+      throw Exception('Failed to clear cart: $e');
+    }
+  }
+
+  @override
+  Stream<Cart> watchCart(String userId) {
+    return _getCartCollection(userId).snapshots().asyncMap((snapshot) async {
+      final cartItems = <CartItem>[];
+
+      for (final doc in snapshot.docs) {
+        final data = doc.data() as Map<String, dynamic>;
+        final cartItem = await _mapToCartItem(doc.id, data);
+        if (cartItem != null) {
+          cartItems.add(cartItem);
+        }
+      }
+
+      return Cart(items: cartItems);
+    });
+  }
+
+  @override
+  Future<Service?> getServiceById(String serviceId) async {
+    final services = await serviceDataSource.getServices();
+    try {
+      return services.firstWhere((service) => service.id == serviceId);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  @override
+  Future<Car?> getCarById(String carId) async {
+    try {
+      final carModel = await carDataSource.getCarById(carId);
+      if (carModel == null) return null;
+
+      // Convert CarModel to Car entity
+      return Car(
+        id: carModel.id,
+        make: carModel.make,
+        model: carModel.model,
+        year: carModel.year,
+        color: carModel.color,
+        licensePlate: carModel.licensePlate,
+        nickname: carModel.nickname,
+        type: carModel.type,
+        isDefault: carModel.isDefault,
+        createdAt: carModel.createdAt,
+        updatedAt: carModel.updatedAt,
+      );
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Helper method to map Firestore document to CartItem entity
+  Future<CartItem?> _mapToCartItem(String id, Map<String, dynamic> data) async {
+    try {
+      final serviceId = data['serviceId'] as String;
+      final carId = data['carId'] as String;
+      final addedAt = DateTime.parse(data['addedAt'] as String);
+
+      final service = await getServiceById(serviceId);
+      final car = await getCarById(carId);
+
+      if (service == null || car == null) {
+        return null;
+      }
+
+      return CartItem(
+        id: id,
+        service: service,
+        car: car,
+        addedAt: addedAt,
+        timeSlot: data['timeSlot'] != null
+            ? TimeSlot.fromMap(data['timeSlot'] as Map<String, dynamic>)
+            : null,
+      );
+    } catch (e) {
+      return null;
+    }
+  }
+}
+
+@Injectable(as: BookingFirestoreDataSource)
+class BookingFirestoreDataSourceImpl implements BookingFirestoreDataSource {
+  final FirebaseFirestore _firestore;
+  final ServiceLocalDataSource serviceDataSource;
+  final CarLocalDataSource carDataSource;
+
+  BookingFirestoreDataSourceImpl(
+    this._firestore, {
+    required this.serviceDataSource,
+    required this.carDataSource,
+  });
+
+  /// Get the bookings collection reference
+  CollectionReference get _bookingsCollection =>
+      _firestore.collection('bookings');
+
+  @override
+  Future<Booking> createBooking(Booking booking) async {
+    try {
+      await _bookingsCollection.doc(booking.id).set(booking.toMap());
+      return booking;
+    } catch (e) {
+      throw Exception('Failed to create booking: $e');
+    }
+  }
+
+  @override
+  Future<List<Booking>> getUserBookings(String userId) async {
+    try {
+      final querySnapshot = await _bookingsCollection
+          .where('userId', isEqualTo: userId)
+          .orderBy('createdAt', descending: true)
+          .get();
+
+      final bookings = <Booking>[];
+      for (final doc in querySnapshot.docs) {
+        final data = doc.data() as Map<String, dynamic>;
+        final booking = await _mapToBooking(doc.id, data);
+        if (booking != null) {
+          bookings.add(booking);
+        }
+      }
+
+      return bookings;
+    } catch (e) {
+      throw Exception('Failed to get user bookings: $e');
+    }
+  }
+
+  @override
+  Future<Booking?> getBookingById(String bookingId) async {
+    try {
+      final doc = await _bookingsCollection.doc(bookingId).get();
+      if (!doc.exists) return null;
+
+      final data = doc.data() as Map<String, dynamic>;
+      return await _mapToBooking(doc.id, data);
+    } catch (e) {
+      throw Exception('Failed to get booking: $e');
+    }
+  }
+
+  @override
+  Future<void> updateBookingStatus(
+    String bookingId,
+    BookingStatus status,
+  ) async {
+    try {
+      final updates = <String, dynamic>{'status': status.name};
+
+      // If completing the booking, set completedAt timestamp
+      if (status == BookingStatus.completed) {
+        updates['completedAt'] = DateTime.now().toIso8601String();
+      }
+
+      await _bookingsCollection.doc(bookingId).update(updates);
+    } catch (e) {
+      throw Exception('Failed to update booking status: $e');
+    }
+  }
+
+  @override
+  Stream<List<Booking>> watchUserBookings(String userId) {
+    return _bookingsCollection
+        .where('userId', isEqualTo: userId)
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .asyncMap((snapshot) async {
+          final bookings = <Booking>[];
+
+          for (final doc in snapshot.docs) {
+            final data = doc.data() as Map<String, dynamic>;
+            final booking = await _mapToBooking(doc.id, data);
+            if (booking != null) {
+              bookings.add(booking);
+            }
+          }
+
+          return bookings;
+        });
+  }
+
+  /// Helper method to map Firestore document to Booking entity
+  Future<Booking?> _mapToBooking(String id, Map<String, dynamic> data) async {
+    try {
+      final userId = data['userId'] as String;
+      final totalPrice = (data['totalPrice'] as num).toDouble();
+      final statusString = data['status'] as String;
+      final createdAt = DateTime.parse(data['createdAt'] as String);
+      final completedAt = data['completedAt'] != null
+          ? DateTime.parse(data['completedAt'] as String)
+          : null;
+      final paymentId = data['paymentId'] as String?;
+      final notes = data['notes'] as String?;
+
+      // Parse booking status
+      final status = BookingStatus.values.firstWhere(
+        (s) => s.name == statusString,
+        orElse: () => BookingStatus.pending,
+      );
+
+      // Reconstruct cart items
+      final itemMaps = List<Map<String, dynamic>>.from(data['items']);
+      final items = <CartItem>[];
+
+      for (final itemMap in itemMaps) {
+        final serviceId = itemMap['serviceId'] as String;
+        final carId = itemMap['carId'] as String;
+        final addedAt = DateTime.parse(itemMap['addedAt'] as String);
+
+        try {
+          final service = await serviceDataSource.getServiceById(serviceId);
+          final carModel = await carDataSource.getCarById(carId);
+
+          if (carModel != null) {
+            // Convert CarModel to Car entity
+            final car = Car(
+              id: carModel.id,
+              make: carModel.make,
+              model: carModel.model,
+              year: carModel.year,
+              color: carModel.color,
+              licensePlate: carModel.licensePlate,
+              nickname: carModel.nickname,
+              type: carModel.type,
+              isDefault: carModel.isDefault,
+              createdAt: carModel.createdAt,
+              updatedAt: carModel.updatedAt,
+            );
+
+            final cartItem = CartItem(
+              id: itemMap['id'] as String,
+              service: service,
+              car: car,
+              addedAt: addedAt,
+              timeSlot: itemMap['timeSlot'] != null
+                  ? TimeSlot.fromMap(
+                      itemMap['timeSlot'] as Map<String, dynamic>,
+                    )
+                  : null,
+            );
+
+            items.add(cartItem);
+          }
+        } catch (e) {
+          // Skip items where service or car can't be found
+          continue;
+        }
+      }
+
+      return Booking(
+        id: id,
+        userId: userId,
+        items: items,
+        totalPrice: totalPrice,
+        status: status,
+        createdAt: createdAt,
+        completedAt: completedAt,
+        paymentId: paymentId,
+        notes: notes,
+      );
+    } catch (e) {
+      return null;
+    }
   }
 }

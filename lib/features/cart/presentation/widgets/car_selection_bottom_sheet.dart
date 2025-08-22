@@ -328,7 +328,11 @@ class CarSelectionBottomSheet extends StatelessWidget {
     final cartCubit = context.read<CartCubit>();
 
     try {
-      await cartCubit.addToCart(service: service, car: car);
+      await cartCubit.addToCart(
+        service: service,
+        car: car,
+        timeSlot: null, // No time slot selected yet in car selection
+      );
 
       if (context.mounted) {
         // Close the car selection modal
@@ -340,6 +344,7 @@ class CarSelectionBottomSheet extends StatelessWidget {
           service: service,
           car: car,
           addedAt: DateTime.now(),
+          timeSlot: null, // No time slot yet
         );
 
         // Show success dialog with options
