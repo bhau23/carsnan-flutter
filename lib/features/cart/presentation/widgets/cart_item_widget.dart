@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../../core/services/dynamic_pricing_service.dart';
+import '../../../../core/injection/injection.dart';
 import '../../domain/entities/cart.dart';
 import '../../../dashboard/domain/entities/service.dart';
 import '../../../car/domain/entities/car.dart';
@@ -17,6 +19,8 @@ class CartItemWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final pricingService = getIt<DynamicPricingService>();
+    final finalPrice = pricingService.calculateServicePrice(cartItem.service, cartItem.car);
 
     return Card(
       elevation: 2,
@@ -120,49 +124,35 @@ class CartItemWidget extends StatelessWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (cartItem.car.type.priceMultiplier != 1.0) ...[
-                      Text(
-                        'Base: \$${cartItem.service.price.toStringAsFixed(2)}',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          decoration: TextDecoration.lineThrough,
-                          color: theme.colorScheme.onSurface.withValues(
-                            alpha: 0.5,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                    ],
                     Row(
                       children: [
                         Text(
-                          '\$${cartItem.finalPrice.toStringAsFixed(2)}',
+                          '\$${finalPrice.toStringAsFixed(2)}',
                           style: theme.textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: const Color(0xFFD4AF37), // Gold color
                           ),
                         ),
-                        if (cartItem.car.type.priceMultiplier != 1.0) ...[
-                          const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: _getServiceColor(
-                                cartItem.service.type,
-                              ).withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Text(
-                              '${cartItem.car.type.displayName} ${(cartItem.car.type.priceMultiplier * 100).toInt()}%',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: _getServiceColor(cartItem.service.type),
-                                fontWeight: FontWeight.w500,
-                              ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: _getServiceColor(
+                              cartItem.service.type,
+                            ).withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            cartItem.car.type.displayName,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: _getServiceColor(cartItem.service.type),
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
-                        ],
+                        ),
                       ],
                     ),
                   ],

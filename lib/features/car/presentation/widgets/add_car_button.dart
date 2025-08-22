@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
+import '../../../../core/services/vehicle_selection_service.dart';
 import '../../domain/entities/car.dart';
 import '../cubit/car_cubit.dart';
 import '../cubit/car_state.dart';
@@ -17,10 +18,19 @@ class AddCarButton extends StatelessWidget {
       child: BlocBuilder<CarCubit, CarState>(
         builder: (context, state) {
           if (state is CarLoaded && state.cars.isNotEmpty) {
-            // If user has cars, show default car or first car
-            final defaultCar =
-                context.read<CarCubit>().defaultCar ?? state.cars.first;
-            return _CarSelectorWidget(car: defaultCar);
+            // Initialize vehicle selection service with available cars
+            final vehicleService = getIt<VehicleSelectionService>();
+            vehicleService.initializeWithDefault(state.cars);
+            
+            // Show live selected vehicle or first available car
+            return StreamBuilder<Car?>(
+              stream: vehicleService.selectedVehicleStream,
+              initialData: vehicleService.selectedVehicle,
+              builder: (context, snapshot) {
+                final selectedCar = snapshot.data ?? state.cars.first;
+                return _LiveVehicleDisplay(car: selectedCar);
+              },
+            );
           }
 
           // If no cars, show add car button
@@ -31,8 +41,8 @@ class AddCarButton extends StatelessWidget {
   }
 }
 
-class _CarSelectorWidget extends StatelessWidget {
-  const _CarSelectorWidget({required this.car});
+class _LiveVehicleDisplay extends StatelessWidget {
+  const _LiveVehicleDisplay({required this.car});
 
   final Car car;
 
@@ -47,6 +57,13 @@ class _CarSelectorWidget extends StatelessWidget {
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: Colors.grey[300]!),
+          boxShadow: [
+            BoxShadow(
+              color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Row(
           children: [
@@ -65,16 +82,20 @@ class _CarSelectorWidget extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    car.displayName,
+                    car.nickname ?? car.make,
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
                   ),
                   Text(
-                    '${car.year} ${car.color} ${car.type.displayName}',
-                    style: Theme.of(
-                      context,
-                    ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
+                    car.model,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.grey[600],
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
                   ),
                 ],
               ),

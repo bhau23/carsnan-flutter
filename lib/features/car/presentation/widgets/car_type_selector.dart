@@ -111,15 +111,15 @@ class _CarTypeCard extends StatelessWidget {
 
             const SizedBox(height: 4),
 
-            // Price multiplier
+            // Car type indicator
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(
-                color: _getPriceColor(type.priceMultiplier),
+                color: Colors.blue,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Text(
-                _getPriceText(type.priceMultiplier),
+                type.displayName,
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 10,
@@ -144,27 +144,5 @@ class _CarTypeCard extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  Color _getPriceColor(double multiplier) {
-    if (multiplier > 1.0) {
-      return Colors.orange;
-    } else if (multiplier < 1.0) {
-      return Colors.green;
-    } else {
-      return Colors.blue;
-    }
-  }
-
-  String _getPriceText(double multiplier) {
-    if (multiplier > 1.0) {
-      final percentage = ((multiplier - 1.0) * 100).round();
-      return '+$percentage%';
-    } else if (multiplier < 1.0) {
-      final percentage = ((1.0 - multiplier) * 100).round();
-      return '-$percentage%';
-    } else {
-      return 'Base';
-    }
   }
 }

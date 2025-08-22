@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
+import '../../../../core/di/injection.dart';
+import '../../../../core/services/dynamic_pricing_service.dart';
+import '../../../../core/services/vehicle_selection_service.dart';
 import '../../domain/entities/service.dart';
+import '../../domain/entities/wash_type.dart';
 import '../widgets/service_item_card.dart';
-import '../../../cart/presentation/widgets/car_selection_bottom_sheet.dart';
+import '../widgets/wash_type_selector.dart';
+import 'time_slot_selection_page.dart';
+import '../../../car/domain/entities/car.dart';
 
 class ServiceDetailsPage extends StatefulWidget {
   final Service service;
@@ -24,6 +30,7 @@ class ServiceDetailsPage extends StatefulWidget {
 class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
   late PageController _pageController;
   int _currentImageIndex = 0;
+  WashType _selectedWashType = WashType.bucket; // Default to bucket wash
 
   // Multiple banner images for each service
   List<String> get _bannerImages {
@@ -118,6 +125,11 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                       // What's included section
                       SliverToBoxAdapter(
                         child: _buildWhatsIncludedSection(context, theme),
+                      ),
+
+                      // Wash type selection section
+                      SliverToBoxAdapter(
+                        child: _buildWashTypeSection(context, theme),
                       ),
 
                       // Bottom padding to account for fixed bottom bar
@@ -386,48 +398,65 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
           ),
           const SizedBox(height: 12),
 
-          // Price and duration row
-          Row(
-            children: [
-              // Price
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.primaryContainer,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  '₹${widget.service.price.toStringAsFixed(0)}',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: theme.colorScheme.onPrimaryContainer,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 16),
+          // Price and duration row with dynamic pricing
+          StreamBuilder<Car?>(
+            stream: getIt<VehicleSelectionService>().selectedVehicleStream,
+            initialData: getIt<VehicleSelectionService>().selectedVehicle,
+            builder: (context, snapshot) {
+              final selectedCar = snapshot.data;
+              final pricingService = getIt<DynamicPricingService>();
+              final dynamicPrice = pricingService.calculateServicePrice(widget.service, selectedCar);
 
-              // Duration
-              Row(
+              return Row(
                 children: [
-                  Icon(
-                    Icons.access_time,
-                    size: 18,
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    '${widget.service.estimatedDurationInMinutes} mins',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                      fontWeight: FontWeight.w500,
+                  // Price with dynamic calculation
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Color(0xFFFFD700), // Gold
+                          Color(0xFFD4AF37), // Darker Gold
+                        ],
+                      ),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      '₹${dynamicPrice.toStringAsFixed(0)}',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
                     ),
                   ),
+                  const SizedBox(width: 16),
+
+                  // Duration
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.access_time,
+                        size: 18,
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${widget.service.estimatedDurationInMinutes} mins',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
-              ),
-            ],
+              );
+            },
           ),
           const SizedBox(height: 16),
 
@@ -495,58 +524,127 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
         ],
       ),
       child: SafeArea(
-        child: Row(
-          children: [
-            // Left side - Price and duration
-            Expanded(
-              flex: 2,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    '₹${widget.service.price.toStringAsFixed(0)}',
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: theme.colorScheme.primary,
-                    ),
-                  ),
-                  Text(
-                    '${widget.service.estimatedDurationInMinutes} mins',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(width: 16),
-
-            // Right side - Add to Cart button
-            Expanded(
-              flex: 3,
-              child: ElevatedButton(
-                onPressed: () {
-                  // Show car selection bottom sheet
-                  CarSelectionBottomSheet.show(context, widget.service);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: theme.colorScheme.primary,
-                  foregroundColor: theme.colorScheme.onPrimary,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+        child: StreamBuilder(
+          stream: getIt<VehicleSelectionService>().selectedVehicleStream,
+          initialData: getIt<VehicleSelectionService>().selectedVehicle,
+          builder: (context, snapshot) {
+            final selectedCar = snapshot.data;
+            final pricingService = getIt<DynamicPricingService>();
+            final pricingInfo = pricingService.getPricingInfo(widget.service, selectedCar);
+            
+            return Row(
+              children: [
+                // Left side - Price and duration with vehicle info
+                Expanded(
+                  flex: 2,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        '₹${pricingInfo.finalPrice.toStringAsFixed(0)}',
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
+                      Text(
+                        '${widget.service.estimatedDurationInMinutes} mins',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                child: const Text(
-                  'Add to Cart',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+
+                const SizedBox(width: 16),
+
+                // Right side - Add to Cart button
+                Expanded(
+                  flex: 3,
+                  child: ElevatedButton(
+                    onPressed: selectedCar != null 
+                      ? () => _addToCartDirectly(context, selectedCar)
+                      : () => _showSelectVehicleMessage(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: theme.colorScheme.primary,
+                      foregroundColor: theme.colorScheme.onPrimary,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(
+                      _getButtonText(selectedCar),
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                  ),
                 ),
-              ),
-            ),
-          ],
+              ],
+            );
+          },
         ),
+      ),
+    );
+  }
+
+  String _getButtonText(Car? selectedCar) {
+    if (selectedCar == null) {
+      return 'Select Vehicle First';
+    }
+    return 'Next Step';
+  }
+
+  void _addToCartDirectly(BuildContext context, Car selectedCar) async {
+    // Navigate to time slot selection
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => TimeSlotSelectionPage(
+          service: widget.service,
+          car: selectedCar,
+          washType: _selectedWashType,
+        ),
+      ),
+    );
+  }
+
+  void _showSelectVehicleMessage(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Please add a vehicle first from the dashboard'),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  Widget _buildWashTypeSection(BuildContext context, ThemeData theme) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Choose Wash Type',
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: theme.colorScheme.onSurface,
+            ),
+          ),
+          const SizedBox(height: 12),
+          WashTypeSelector(
+            selectedWashType: _selectedWashType,
+            onWashTypeChanged: (WashType? washType) {
+              if (washType != null) {
+                setState(() {
+                  _selectedWashType = washType;
+                });
+              }
+            },
+          ),
+          const SizedBox(height: 20),
+        ],
       ),
     );
   }

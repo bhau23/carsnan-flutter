@@ -18,7 +18,7 @@ class ServiceItemCard extends StatelessWidget {
     if (name.contains('foam') && name.contains('wash')) {
       return 'assets/images/service_items/shared/foam_wash.jpg';
     } else if (name.contains('exterior') && name.contains('wash')) {
-      return 'assets/images/service_items/shared/exterior_wash.jpg';
+      return 'assets/images/service_items/shared/exterior_rinse.jpg'; // Fixed: Use existing asset
     } else if (name.contains('interior') && (name.contains('vacuum') || name.contains('clean'))) {
       return 'assets/images/service_items/shared/interior_vacuum.jpg';
     } else if (name.contains('interior') && name.contains('detail')) {
@@ -33,7 +33,7 @@ class ServiceItemCard extends StatelessWidget {
       if (name.contains('polish')) {
         return 'assets/images/service_items/shared/tire_polish.jpg';
       } else {
-        return 'assets/images/service_items/shared/tire_check.jpg';
+        return 'assets/images/service_items/shared/tire_cleaning.jpg'; // Fixed: Use existing asset
       }
     } else if (name.contains('full') && name.contains('detail')) {
       return 'assets/images/service_items/shared/full_detailing.jpg';
@@ -44,7 +44,7 @@ class ServiceItemCard extends StatelessWidget {
     } else if (name.contains('premium') && name.contains('wax')) {
       return 'assets/images/service_items/shared/premium_wax.jpg';
     } else if (name.contains('basic') && name.contains('inspection')) {
-      return 'assets/images/service_items/shared/basic_inspection.jpg';
+      return 'assets/images/service_items/shared/engine_cleaning.jpg'; // Fixed: Use existing asset
     } else {
       // Default fallback image
       return 'assets/images/service_items/shared/default_service.jpg';

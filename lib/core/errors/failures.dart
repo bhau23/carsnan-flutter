@@ -29,3 +29,7 @@ class CacheFailure extends Failure {
 class ValidationFailure extends Failure {
   const ValidationFailure(super.message);
 }
+
+class GeneralFailure extends Failure {
+  const GeneralFailure(super.message);
+}

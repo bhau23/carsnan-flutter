@@ -208,12 +208,13 @@ void main() {
       expect(carCubit.cars, testCars);
     });
 
-    test('should return default car from state', () {
+    // Remove defaultCar test since we removed that functionality
+    test('should return cars from loaded state', () {
       // arrange
       carCubit.emit(CarLoaded(cars: testCars));
 
       // act & assert
-      expect(carCubit.defaultCar, testCars[0]); // First car is default
+      expect(carCubit.cars, testCars);
     });
   });
 

@@ -1,12 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import '../../../../core/services/addon_service.dart';
 import '../cubit/cart_cubit.dart';
 import '../cubit/cart_state.dart';
 import '../widgets/cart_item_widget.dart';
+import '../widgets/addon_product_card.dart';
 
 /// Full cart view page showing all cart items
-class CartPage extends StatelessWidget {
+class CartPage extends StatefulWidget {
   const CartPage({super.key});
+
+  @override
+  State<CartPage> createState() => _CartPageState();
+}
+
+class _CartPageState extends State<CartPage> {
+  final AddonService _addonService = AddonService();
+  final Map<String, int> _addonQuantities = {};
 
   @override
   Widget build(BuildContext context) {
@@ -83,19 +94,34 @@ class CartPage extends StatelessWidget {
             children: [
               // Cart items list
               Expanded(
-                child: ListView.separated(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: state.cart.items.length,
-                  separatorBuilder: (context, index) =>
-                      const SizedBox(height: 12),
-                  itemBuilder: (context, index) {
-                    final item = state.cart.items[index];
-                    return CartItemWidget(
-                      cartItem: item,
-                      onRemove: () =>
-                          context.read<CartCubit>().removeFromCart(item.id),
-                    );
-                  },
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      // Cart Items Section
+                      ListView.separated(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        padding: const EdgeInsets.all(16),
+                        itemCount: state.cart.items.length,
+                        separatorBuilder: (context, index) =>
+                            const SizedBox(height: 12),
+                        itemBuilder: (context, index) {
+                          final item = state.cart.items[index];
+                          return CartItemWidget(
+                            cartItem: item,
+                            onRemove: () =>
+                                context.read<CartCubit>().removeFromCart(item.id),
+                          );
+                        },
+                      ),
+
+                      // Add Another Service Section
+                      _buildAddAnotherServiceSection(context, theme),
+
+                      // Add-ons Section
+                      _buildAddonsSection(context, theme),
+                    ],
+                  ),
                 ),
               ),
 
@@ -172,7 +198,7 @@ class CartPage extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Total (${state.itemCount} items)',
+                      'Total (${_getTotalItemCount(state)} items)',
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
@@ -188,7 +214,7 @@ class CartPage extends StatelessWidget {
                   ],
                 ),
                 Text(
-                  '\$${state.totalPrice.toStringAsFixed(2)}',
+                  '\$${_getTotalPrice(state).toStringAsFixed(2)}',
                   style: theme.textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: const Color(0xFFD4AF37), // Gold color
@@ -221,6 +247,156 @@ class CartPage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _buildAddAnotherServiceSection(BuildContext context, ThemeData theme) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: theme.colorScheme.outline.withValues(alpha: 0.2),
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            'Add Another Service',
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: theme.colorScheme.onSurface,
+            ),
+          ),
+          OutlinedButton(
+            onPressed: () => _addAnotherService(context),
+            style: OutlinedButton.styleFrom(
+              side: BorderSide(color: theme.colorScheme.primary),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            ),
+            child: Text(
+              'Add Service',
+              style: TextStyle(
+                color: theme.colorScheme.primary,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAddonsSection(BuildContext context, ThemeData theme) {
+    final availableAddons = _addonService.getAllAddons();
+    
+    return Container(
+      margin: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Section Header
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Add-ons',
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Enhance your service with accessories',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+              if (_getTotalAddonsCount() > 0)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primary,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    '${_getTotalAddonsCount()} added',
+                    style: TextStyle(
+                      color: theme.colorScheme.onPrimary,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          
+          const SizedBox(height: 16),
+          
+          // Horizontal scrollable addon products
+          SizedBox(
+            height: 200,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: availableAddons.length,
+              itemBuilder: (context, index) {
+                final addon = availableAddons[index];
+                final quantity = _addonQuantities[addon.id] ?? 0;
+                
+                return AddonProductCard(
+                  product: addon,
+                  quantity: quantity,
+                  onQuantityChanged: (newQuantity) {
+                    setState(() {
+                      if (newQuantity > 0) {
+                        _addonQuantities[addon.id] = newQuantity;
+                      } else {
+                        _addonQuantities.remove(addon.id);
+                      }
+                    });
+                  },
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  int _getTotalAddonsCount() {
+    return _addonQuantities.values.fold(0, (sum, quantity) => sum + quantity);
+  }
+
+  double _getAddonsTotal() {
+    double total = 0;
+    _addonQuantities.forEach((addonId, quantity) {
+      final addon = _addonService.findAddonById(addonId);
+      if (addon != null) {
+        total += addon.price * quantity;
+      }
+    });
+    return total;
+  }
+
+  double _getTotalPrice(CartState state) {
+    return state.totalPrice + _getAddonsTotal();
+  }
+
+  int _getTotalItemCount(CartState state) {
+    return state.itemCount + _getTotalAddonsCount();
   }
 
   void _showClearCartDialog(BuildContext context) {
@@ -259,5 +435,10 @@ class CartPage extends StatelessWidget {
         behavior: SnackBarBehavior.floating,
       ),
     );
+  }
+
+  void _addAnotherService(BuildContext context) {
+    // Navigate to car selection page where users can select a car for another service
+    context.push('/cars');
   }
 }

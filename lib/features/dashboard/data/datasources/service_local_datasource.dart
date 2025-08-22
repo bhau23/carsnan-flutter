@@ -33,7 +33,7 @@ class ServiceLocalDataSourceImpl implements ServiceLocalDataSource {
           ServiceItem(
             id: '1_1',
             name: 'Exterior Wash',
-            imagePath: 'assets/images/service_items/exterior_wash.jpg',
+            imagePath: 'assets/images/service_items/exterior_rinse.jpg', // Fixed: Use existing asset
             description: 'Complete exterior cleaning',
           ),
           ServiceItem(
@@ -45,13 +45,13 @@ class ServiceLocalDataSourceImpl implements ServiceLocalDataSource {
           ServiceItem(
             id: '1_3',
             name: 'Tire Check',
-            imagePath: 'assets/images/service_items/tire_check.jpg',
+            imagePath: 'assets/images/service_items/tire_cleaning.jpg', // Fixed: Use existing asset
             description: 'Tire pressure and condition check',
           ),
           ServiceItem(
             id: '1_4',
             name: 'Basic Inspection',
-            imagePath: 'assets/images/service_items/basic_inspection.jpg',
+            imagePath: 'assets/images/service_items/engine_cleaning.jpg', // Fixed: Use existing asset
             description: 'General vehicle inspection',
           ),
         ],

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/services/dynamic_pricing_service.dart';
+import '../../../../core/injection/injection.dart';
 import '../../../car/presentation/cubit/car_cubit.dart';
 import '../../../car/presentation/cubit/car_state.dart';
 import '../../../car/domain/entities/car.dart';
@@ -177,7 +179,8 @@ class CarSelectionBottomSheet extends StatelessWidget {
   Widget _buildCarCard(BuildContext context, ThemeData theme, Car car) {
     final cartCubit = context.read<CartCubit>();
     final isInCart = cartCubit.isServiceCarInCart(service.id, car.id);
-    final finalPrice = car.type.calculatePrice(service.price);
+    final pricingService = getIt<DynamicPricingService>();
+    final finalPrice = pricingService.calculateServicePrice(service, car);
 
     return Card(
       elevation: 2,
@@ -258,17 +261,6 @@ class CarSelectionBottomSheet extends StatelessWidget {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            if (car.type.priceMultiplier != 1.0) ...[
-                              Text(
-                                'Base: \$${service.price.toStringAsFixed(2)}',
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  decoration: TextDecoration.lineThrough,
-                                  color: theme.colorScheme.onSurface.withValues(
-                                    alpha: 0.5,
-                                  ),
-                                ),
-                              ),
-                            ],
                             Text(
                               '\$${finalPrice.toStringAsFixed(2)}',
                               style: theme.textTheme.titleMedium?.copyWith(

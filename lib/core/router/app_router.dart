@@ -11,6 +11,7 @@ import 'package:carsnan/features/car/presentation/pages/car_list_page.dart';
 import 'package:carsnan/features/car/presentation/pages/add_car_page.dart';
 import 'package:carsnan/features/car/presentation/pages/edit_car_page.dart';
 import 'package:carsnan/features/cart/presentation/pages/cart_page.dart';
+import 'package:carsnan/features/address/presentation/pages/add_address_page.dart';
 import 'dart:async';
 
 class AppRouter {
@@ -70,6 +71,12 @@ class AppRouter {
         path: '/cart',
         builder: (BuildContext context, GoRouterState state) =>
             const CartPage(),
+      ),
+      // Address routes
+      GoRoute(
+        path: '/address',
+        builder: (BuildContext context, GoRouterState state) =>
+            const AddAddressPage(),
       ),
     ],
     redirect: (BuildContext context, GoRouterState state) {

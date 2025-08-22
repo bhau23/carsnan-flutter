@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import '../../../../core/di/injection.dart';
+import '../../../../core/services/dynamic_pricing_service.dart';
+import '../../../../core/services/vehicle_selection_service.dart';
 import '../../domain/entities/service.dart';
+import '../../../car/domain/entities/car.dart';
 
 class ServiceCard extends StatelessWidget {
   final Service service;
@@ -9,6 +13,20 @@ class ServiceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return StreamBuilder<Car?>(
+      stream: getIt<VehicleSelectionService>().selectedVehicleStream,
+      initialData: getIt<VehicleSelectionService>().selectedVehicle,
+      builder: (context, snapshot) {
+        final selectedCar = snapshot.data;
+        final pricingService = getIt<DynamicPricingService>();
+        final pricingInfo = pricingService.getPricingInfo(service, selectedCar);
+        
+        return _buildServiceCard(context, pricingInfo);
+      },
+    );
+  }
+
+  Widget _buildServiceCard(BuildContext context, PricingInfo pricingInfo) {
     final theme = Theme.of(context);
 
     return Card(
@@ -44,7 +62,7 @@ class ServiceCard extends StatelessWidget {
                     ),
                   ),
                   // Price Tag in Bottom Right Corner
-                  Positioned(bottom: 8, right: 8, child: _buildPriceTag()),
+                  Positioned(bottom: 8, right: 8, child: _buildPriceTag(pricingInfo)),
                 ],
               ),
             ),
@@ -84,10 +102,45 @@ class ServiceCard extends StatelessWidget {
                     service.description,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                      fontSize: 11,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 8),
+
+                  // Service Type and Duration
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: _getServiceColor(service.type).withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          service.type.name.toUpperCase(),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: _getServiceColor(service.type),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Icon(
+                        Icons.access_time,
+                        size: 14,
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${service.estimatedDurationInMinutes}m',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -99,35 +152,39 @@ class ServiceCard extends StatelessWidget {
   }
 
   Widget _buildServiceImage() {
-    return Image.asset(
-      service.iconPath,
-      fit: BoxFit.cover,
-      width: double.infinity,
-      height: double.infinity,
-      errorBuilder: (context, error, stackTrace) {
-        // Fallback to gradient background with icon if image is not found
-        return Container(
-          width: double.infinity,
-          height: double.infinity,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                _getServiceColor(service.type).withValues(alpha: 0.8),
-                _getServiceColor(service.type).withValues(alpha: 0.6),
-              ],
-            ),
+    // Get the correct image path based on service type
+    String imagePath;
+    switch (service.type) {
+      case ServiceType.general:
+        imagePath = 'assets/images/services/general_wash.png';
+        break;
+      case ServiceType.premium:
+        imagePath = 'assets/images/services/premium_wash.png';
+        break;
+      case ServiceType.luxury:
+        imagePath = 'assets/images/services/luxury_wash.png';
+        break;
+    }
+
+    return Container(
+      decoration: BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage(imagePath),
+          fit: BoxFit.cover,
+        ),
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Colors.transparent,
+              Colors.black.withValues(alpha: 0.3),
+            ],
           ),
-          child: Center(
-            child: Icon(
-              _getServiceIcon(service.type),
-              size: 48,
-              color: Colors.white,
-            ),
-          ),
-        );
-      },
+        ),
+      ),
     );
   }
 
@@ -142,18 +199,7 @@ class ServiceCard extends StatelessWidget {
     }
   }
 
-  IconData _getServiceIcon(ServiceType type) {
-    switch (type) {
-      case ServiceType.general:
-        return Icons.local_car_wash;
-      case ServiceType.premium:
-        return Icons.car_repair;
-      case ServiceType.luxury:
-        return Icons.diamond;
-    }
-  }
-
-  Widget _buildPriceTag() {
+  Widget _buildPriceTag(PricingInfo pricingInfo) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
@@ -163,13 +209,12 @@ class ServiceCard extends StatelessWidget {
           colors: [
             Color(0xFFFFD700), // Gold
             Color(0xFFD4AF37), // Darker Gold
-            Color(0xFFB8860B), // Dark Gold
           ],
         ),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFFD4AF37).withValues(alpha: 0.3),
+            color: const Color(0xFFFFD700).withValues(alpha: 0.3),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -185,12 +230,11 @@ class ServiceCard extends StatelessWidget {
         ),
       ),
       child: Text(
-        '\$${service.price.toStringAsFixed(0)}',
+        '\$${pricingInfo.finalPrice.toStringAsFixed(0)}',
         style: const TextStyle(
           color: Colors.black87,
           fontSize: 12,
           fontWeight: FontWeight.bold,
-          letterSpacing: 0.5,
         ),
       ),
     );
