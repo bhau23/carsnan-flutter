@@ -135,3 +135,112 @@ class BookingRepositoryImpl implements BookingRepository {
     return bookingDataSource.watchUserBookings(userId);
   }
 }
+
+@Injectable(as: ReviewRepository)
+class ReviewRepositoryImpl implements ReviewRepository {
+  final ReviewFirestoreDataSource reviewDataSource;
+
+  ReviewRepositoryImpl({required this.reviewDataSource});
+
+  @override
+  Future<Review> createReview({
+    required String bookingId,
+    required String clientId,
+    required String workerId,
+    required int rating,
+    String? comment,
+    String? serviceName,
+    String? serviceDescription,
+    String? clientName,
+    String? clientEmail,
+    String? workerName,
+  }) async {
+    final review = Review(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      bookingId: bookingId,
+      clientId: clientId,
+      workerId: workerId,
+      rating: rating,
+      comment: comment,
+      createdAt: DateTime.now(),
+      serviceName: serviceName,
+      serviceDescription: serviceDescription,
+      clientName: clientName,
+      clientEmail: clientEmail,
+      workerName: workerName,
+    );
+
+    return await reviewDataSource.createReview(review);
+  }
+
+  @override
+  Future<List<Review>> getBookingReviews(String bookingId) async {
+    return await reviewDataSource.getBookingReviews(bookingId);
+  }
+
+  @override
+  Future<List<Review>> getClientReviews(String clientId) async {
+    return await reviewDataSource.getClientReviews(clientId);
+  }
+
+  @override
+  Future<List<Review>> getWorkerReviews(String workerId) async {
+    return await reviewDataSource.getWorkerReviews(workerId);
+  }
+
+  @override
+  Future<Review?> getReviewById(String reviewId) async {
+    return await reviewDataSource.getReviewById(reviewId);
+  }
+
+  @override
+  Future<Review> updateReview({
+    required String reviewId,
+    int? rating,
+    String? comment,
+  }) async {
+    final updates = <String, dynamic>{};
+    if (rating != null) updates['rating'] = rating;
+    if (comment != null) updates['comment'] = comment;
+
+    return await reviewDataSource.updateReview(reviewId, updates);
+  }
+
+  @override
+  Future<void> deleteReview(String reviewId) async {
+    await reviewDataSource.deleteReview(reviewId);
+  }
+
+  @override
+  Future<bool> hasClientReviewedBooking(
+    String bookingId,
+    String clientId,
+  ) async {
+    return await reviewDataSource.hasClientReviewedBooking(bookingId, clientId);
+  }
+
+  @override
+  Future<double> getWorkerAverageRating(String workerId) async {
+    return await reviewDataSource.getWorkerAverageRating(workerId);
+  }
+
+  @override
+  Future<int> getWorkerReviewCount(String workerId) async {
+    return await reviewDataSource.getWorkerReviewCount(workerId);
+  }
+
+  @override
+  Stream<List<Review>> watchBookingReviews(String bookingId) {
+    return reviewDataSource.watchBookingReviews(bookingId);
+  }
+
+  @override
+  Stream<List<Review>> watchClientReviews(String clientId) {
+    return reviewDataSource.watchClientReviews(clientId);
+  }
+
+  @override
+  Stream<List<Review>> watchWorkerReviews(String workerId) {
+    return reviewDataSource.watchWorkerReviews(workerId);
+  }
+}

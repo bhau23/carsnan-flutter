@@ -1,7 +1,9 @@
+import 'package:injectable/injectable.dart';
 import '../../domain/entities/service.dart';
 import '../datasources/service_local_datasource.dart';
 import '../../domain/repositories/service_repository.dart';
 
+@Injectable(as: ServiceRepository)
 class ServiceRepositoryImpl implements ServiceRepository {
   final ServiceLocalDataSource localDataSource;
 

@@ -1,6 +1,6 @@
+import 'package:carsnan/core/di/injection.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/services/dynamic_pricing_service.dart';
-import '../../../../core/injection/injection.dart';
 import '../../domain/entities/cart.dart';
 import '../../../dashboard/domain/entities/service.dart';
 import '../../../car/domain/entities/car.dart';

@@ -345,3 +345,167 @@ class Booking extends Equatable {
 
 /// Enum for booking status
 enum BookingStatus { pending, confirmed, inProgress, completed, cancelled }
+
+/// Review entity representing a service review and rating
+class Review extends Equatable {
+  const Review({
+    required this.id,
+    required this.bookingId,
+    required this.clientId,
+    required this.workerId,
+    required this.rating,
+    this.comment,
+    required this.createdAt,
+    this.updatedAt,
+    // Booking details for display
+    this.serviceName,
+    this.serviceDescription,
+    // Client details for display
+    this.clientName,
+    this.clientEmail,
+    // Worker details for display
+    this.workerName,
+  });
+
+  final String id;
+  final String bookingId;
+  final String clientId;
+  final String workerId;
+  final int rating; // 1-5 stars
+  final String? comment;
+  final DateTime createdAt;
+  final DateTime? updatedAt;
+
+  // Booking details for display
+  final String? serviceName;
+  final String? serviceDescription;
+
+  // Client details for display
+  final String? clientName;
+  final String? clientEmail;
+
+  // Worker details for display
+  final String? workerName;
+
+  /// Check if review has a comment
+  bool get hasComment => comment != null && comment!.isNotEmpty;
+
+  /// Get star rating as a double for display
+  double get ratingAsDouble => rating.toDouble();
+
+  /// Get rating description
+  String get ratingDescription {
+    switch (rating) {
+      case 1:
+        return 'Poor';
+      case 2:
+        return 'Fair';
+      case 3:
+        return 'Good';
+      case 4:
+        return 'Very Good';
+      case 5:
+        return 'Excellent';
+      default:
+        return 'Unknown';
+    }
+  }
+
+  /// Get formatted date
+  String get formattedDate {
+    return '${createdAt.day}/${createdAt.month}/${createdAt.year}';
+  }
+
+  /// Check if rating is valid (1-5)
+  bool get isValidRating => rating >= 1 && rating <= 5;
+
+  /// Create a copy with updated fields
+  Review copyWith({
+    String? id,
+    String? bookingId,
+    String? clientId,
+    String? workerId,
+    int? rating,
+    String? comment,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    String? serviceName,
+    String? serviceDescription,
+    String? clientName,
+    String? clientEmail,
+    String? workerName,
+  }) {
+    return Review(
+      id: id ?? this.id,
+      bookingId: bookingId ?? this.bookingId,
+      clientId: clientId ?? this.clientId,
+      workerId: workerId ?? this.workerId,
+      rating: rating ?? this.rating,
+      comment: comment ?? this.comment,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      serviceName: serviceName ?? this.serviceName,
+      serviceDescription: serviceDescription ?? this.serviceDescription,
+      clientName: clientName ?? this.clientName,
+      clientEmail: clientEmail ?? this.clientEmail,
+      workerName: workerName ?? this.workerName,
+    );
+  }
+
+  /// Convert Review to Map for Firestore storage
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'bookingId': bookingId,
+      'clientId': clientId,
+      'workerId': workerId,
+      'rating': rating,
+      'comment': comment,
+      'createdAt': createdAt.toIso8601String(),
+      'updatedAt': updatedAt?.toIso8601String(),
+      'serviceName': serviceName,
+      'serviceDescription': serviceDescription,
+      'clientName': clientName,
+      'clientEmail': clientEmail,
+      'workerName': workerName,
+    };
+  }
+
+  /// Create Review from Map
+  static Review fromMap(Map<String, dynamic> map) {
+    return Review(
+      id: map['id'] as String,
+      bookingId: map['bookingId'] as String,
+      clientId: map['clientId'] as String,
+      workerId: map['workerId'] as String,
+      rating: map['rating'] as int,
+      comment: map['comment'] as String?,
+      createdAt: DateTime.parse(map['createdAt'] as String),
+      updatedAt: map['updatedAt'] != null
+          ? DateTime.parse(map['updatedAt'] as String)
+          : null,
+      serviceName: map['serviceName'] as String?,
+      serviceDescription: map['serviceDescription'] as String?,
+      clientName: map['clientName'] as String?,
+      clientEmail: map['clientEmail'] as String?,
+      workerName: map['workerName'] as String?,
+    );
+  }
+
+  @override
+  List<Object?> get props => [
+    id,
+    bookingId,
+    clientId,
+    workerId,
+    rating,
+    comment,
+    createdAt,
+    updatedAt,
+    serviceName,
+    serviceDescription,
+    clientName,
+    clientEmail,
+    workerName,
+  ];
+}

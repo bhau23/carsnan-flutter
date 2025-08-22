@@ -471,3 +471,203 @@ class BookingFirestoreDataSourceImpl implements BookingFirestoreDataSource {
     }
   }
 }
+
+@Injectable(as: ReviewFirestoreDataSource)
+class ReviewFirestoreDataSourceImpl implements ReviewFirestoreDataSource {
+  final FirebaseFirestore _firestore;
+
+  ReviewFirestoreDataSourceImpl(this._firestore);
+
+  /// Get the reviews collection reference
+  CollectionReference get _reviewsCollection =>
+      _firestore.collection('reviews');
+
+  @override
+  Future<Review> createReview(Review review) async {
+    try {
+      await _reviewsCollection.doc(review.id).set(review.toMap());
+      return review;
+    } catch (e) {
+      throw Exception('Failed to create review: $e');
+    }
+  }
+
+  @override
+  Future<List<Review>> getBookingReviews(String bookingId) async {
+    try {
+      final querySnapshot = await _reviewsCollection
+          .where('bookingId', isEqualTo: bookingId)
+          .orderBy('createdAt', descending: true)
+          .get();
+
+      return querySnapshot.docs
+          .map((doc) => Review.fromMap(doc.data() as Map<String, dynamic>))
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to get booking reviews: $e');
+    }
+  }
+
+  @override
+  Future<List<Review>> getClientReviews(String clientId) async {
+    try {
+      final querySnapshot = await _reviewsCollection
+          .where('clientId', isEqualTo: clientId)
+          .orderBy('createdAt', descending: true)
+          .get();
+
+      return querySnapshot.docs
+          .map((doc) => Review.fromMap(doc.data() as Map<String, dynamic>))
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to get client reviews: $e');
+    }
+  }
+
+  @override
+  Future<List<Review>> getWorkerReviews(String workerId) async {
+    try {
+      final querySnapshot = await _reviewsCollection
+          .where('workerId', isEqualTo: workerId)
+          .orderBy('createdAt', descending: true)
+          .get();
+
+      return querySnapshot.docs
+          .map((doc) => Review.fromMap(doc.data() as Map<String, dynamic>))
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to get worker reviews: $e');
+    }
+  }
+
+  @override
+  Future<Review?> getReviewById(String reviewId) async {
+    try {
+      final doc = await _reviewsCollection.doc(reviewId).get();
+      if (!doc.exists) return null;
+
+      return Review.fromMap(doc.data() as Map<String, dynamic>);
+    } catch (e) {
+      throw Exception('Failed to get review: $e');
+    }
+  }
+
+  @override
+  Future<Review> updateReview(
+    String reviewId,
+    Map<String, dynamic> updates,
+  ) async {
+    try {
+      // Add updatedAt timestamp
+      updates['updatedAt'] = DateTime.now().toIso8601String();
+
+      await _reviewsCollection.doc(reviewId).update(updates);
+
+      // Return the updated review
+      final updatedDoc = await _reviewsCollection.doc(reviewId).get();
+      return Review.fromMap(updatedDoc.data() as Map<String, dynamic>);
+    } catch (e) {
+      throw Exception('Failed to update review: $e');
+    }
+  }
+
+  @override
+  Future<void> deleteReview(String reviewId) async {
+    try {
+      await _reviewsCollection.doc(reviewId).delete();
+    } catch (e) {
+      throw Exception('Failed to delete review: $e');
+    }
+  }
+
+  @override
+  Future<bool> hasClientReviewedBooking(
+    String bookingId,
+    String clientId,
+  ) async {
+    try {
+      final querySnapshot = await _reviewsCollection
+          .where('bookingId', isEqualTo: bookingId)
+          .where('clientId', isEqualTo: clientId)
+          .limit(1)
+          .get();
+
+      return querySnapshot.docs.isNotEmpty;
+    } catch (e) {
+      throw Exception('Failed to check if client reviewed booking: $e');
+    }
+  }
+
+  @override
+  Future<double> getWorkerAverageRating(String workerId) async {
+    try {
+      final querySnapshot = await _reviewsCollection
+          .where('workerId', isEqualTo: workerId)
+          .get();
+
+      if (querySnapshot.docs.isEmpty) return 0.0;
+
+      double totalRating = 0.0;
+      for (final doc in querySnapshot.docs) {
+        final data = doc.data() as Map<String, dynamic>;
+        totalRating += (data['rating'] as int).toDouble();
+      }
+
+      return totalRating / querySnapshot.docs.length;
+    } catch (e) {
+      throw Exception('Failed to get worker average rating: $e');
+    }
+  }
+
+  @override
+  Future<int> getWorkerReviewCount(String workerId) async {
+    try {
+      final querySnapshot = await _reviewsCollection
+          .where('workerId', isEqualTo: workerId)
+          .get();
+
+      return querySnapshot.docs.length;
+    } catch (e) {
+      throw Exception('Failed to get worker review count: $e');
+    }
+  }
+
+  @override
+  Stream<List<Review>> watchBookingReviews(String bookingId) {
+    return _reviewsCollection
+        .where('bookingId', isEqualTo: bookingId)
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snapshot) {
+          return snapshot.docs
+              .map((doc) => Review.fromMap(doc.data() as Map<String, dynamic>))
+              .toList();
+        });
+  }
+
+  @override
+  Stream<List<Review>> watchClientReviews(String clientId) {
+    return _reviewsCollection
+        .where('clientId', isEqualTo: clientId)
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snapshot) {
+          return snapshot.docs
+              .map((doc) => Review.fromMap(doc.data() as Map<String, dynamic>))
+              .toList();
+        });
+  }
+
+  @override
+  Stream<List<Review>> watchWorkerReviews(String workerId) {
+    return _reviewsCollection
+        .where('workerId', isEqualTo: workerId)
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snapshot) {
+          return snapshot.docs
+              .map((doc) => Review.fromMap(doc.data() as Map<String, dynamic>))
+              .toList();
+        });
+  }
+}

@@ -68,3 +68,45 @@ abstract class BookingFirestoreDataSource {
   /// Get bookings stream for reactive updates
   Stream<List<Booking>> watchUserBookings(String userId);
 }
+
+/// Abstract Firestore data source for review operations
+abstract class ReviewFirestoreDataSource {
+  /// Create a new review
+  Future<Review> createReview(Review review);
+
+  /// Get all reviews for a specific booking
+  Future<List<Review>> getBookingReviews(String bookingId);
+
+  /// Get all reviews by a client
+  Future<List<Review>> getClientReviews(String clientId);
+
+  /// Get all reviews for a worker
+  Future<List<Review>> getWorkerReviews(String workerId);
+
+  /// Get a specific review by ID
+  Future<Review?> getReviewById(String reviewId);
+
+  /// Update an existing review
+  Future<Review> updateReview(String reviewId, Map<String, dynamic> updates);
+
+  /// Delete a review
+  Future<void> deleteReview(String reviewId);
+
+  /// Check if a booking already has a review from the client
+  Future<bool> hasClientReviewedBooking(String bookingId, String clientId);
+
+  /// Get average rating for a worker
+  Future<double> getWorkerAverageRating(String workerId);
+
+  /// Get review count for a worker
+  Future<int> getWorkerReviewCount(String workerId);
+
+  /// Get reviews stream for reactive updates
+  Stream<List<Review>> watchBookingReviews(String bookingId);
+
+  /// Get client reviews stream
+  Stream<List<Review>> watchClientReviews(String clientId);
+
+  /// Get worker reviews stream
+  Stream<List<Review>> watchWorkerReviews(String workerId);
+}

@@ -24,8 +24,11 @@ class DashboardPage extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (context) =>
-              DashboardCubit(getServicesUseCase: context.read())..loadServices(),
+          create: (context) => DashboardCubit(
+            getServicesUseCase: context.read(),
+            bookingRepository: getIt(),
+            reviewRepository: getIt(),
+          )..loadServices(),
         ),
         BlocProvider(
           create: (context) => getIt<AddressCubit>()..loadAddresses(),
@@ -126,28 +129,219 @@ class DashboardView extends StatelessWidget {
   }
 
   Widget _buildOrdersPage(BuildContext context, ThemeData theme) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.shopping_bag_outlined,
-            size: 80,
-            color: theme.colorScheme.outline,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'No orders yet',
-            style: theme.textTheme.headlineSmall?.copyWith(
-              color: theme.colorScheme.outline,
+    return BlocBuilder<DashboardCubit, DashboardState>(
+      builder: (context, state) {
+        if (state.isLoadingOrders) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (state.ordersError != null) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.error_outline,
+                  size: 64,
+                  color: theme.colorScheme.error,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Error loading orders',
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    color: theme.colorScheme.error,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  state.ordersError!,
+                  style: theme.textTheme.bodyMedium,
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () => context.read<DashboardCubit>().loadOrders(),
+                  child: const Text('Retry'),
+                ),
+              ],
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Your order history will appear here',
-            style: theme.textTheme.bodyLarge?.copyWith(
-              color: theme.colorScheme.outline,
+          );
+        }
+
+        if (state.orders.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.shopping_bag_outlined,
+                  size: 80,
+                  color: theme.colorScheme.outline,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'No orders yet',
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    color: theme.colorScheme.outline,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Your order history will appear here',
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: theme.colorScheme.outline,
+                  ),
+                ),
+              ],
             ),
+          );
+        }
+
+        return RefreshIndicator(
+          onRefresh: () => context.read<DashboardCubit>().loadOrders(),
+          child: ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: state.orders.length,
+            itemBuilder: (context, index) {
+              final order = state.orders[index];
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: _buildOrderCard(context, theme, order),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildOrderCard(BuildContext context, ThemeData theme, order) {
+    // Simple order card for now
+    return Card(
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Order #${order.id.substring(0, 8)}',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: _getStatusColor(order.status),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    order.status.name.toUpperCase(),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '${order.items.length} service(s) • \$${order.totalPrice.toStringAsFixed(2)}',
+              style: theme.textTheme.bodyMedium,
+            ),
+            Text(
+              'Created: ${_formatDate(order.createdAt)}',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            if (order.status.name == 'completed') ...[
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => _showReviewDialog(context, order),
+                      child: const Text('Leave Review'),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Color _getStatusColor(status) {
+    switch (status.name) {
+      case 'pending':
+        return Colors.orange;
+      case 'confirmed':
+        return Colors.blue;
+      case 'inProgress':
+        return Colors.purple;
+      case 'completed':
+        return Colors.green;
+      case 'cancelled':
+        return Colors.red;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.day}/${date.month}/${date.year}';
+  }
+
+  void _showReviewDialog(BuildContext context, order) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Leave a Review'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('How was your service experience?'),
+            const SizedBox(height: 16),
+            // Simple star rating
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(5, (index) {
+                return IconButton(
+                  onPressed: () {
+                    final rating = index + 1;
+                    Navigator.of(context).pop();
+                    context.read<DashboardCubit>().createReview(
+                      bookingId: order.id,
+                      rating: rating,
+                      comment: 'Great service!',
+                    );
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Thank you for your review!'),
+                      ),
+                    );
+                  },
+                  icon: Icon(Icons.star, color: Colors.amber),
+                );
+              }),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
           ),
         ],
       ),
