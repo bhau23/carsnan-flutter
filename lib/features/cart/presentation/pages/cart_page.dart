@@ -670,7 +670,8 @@ class _CartPageState extends State<CartPage> {
   }
 
   void _addAnotherService(BuildContext context) {
-    // Navigate to car selection page where users can select a car for another service
-    context.push('/cars');
+    // Navigate back to dashboard to select another service
+    Navigator.of(context).pop(); // Close cart page
+    // The user will be on the dashboard where they can select another service
   }
 }
