@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../core/models/time_slot.dart';
 import '../../../dashboard/data/datasources/service_local_datasource.dart';
 import '../../../car/data/datasources/car_local_data_source.dart';
+import '../../../car/data/models/car_model.dart';
 import '../../../dashboard/domain/entities/service.dart';
 import '../../../car/domain/entities/car.dart';
 import '../../domain/entities/cart.dart';
@@ -128,8 +129,8 @@ class CartLocalDataSourceImpl implements CartLocalDataSource {
 @Injectable(as: CartFirestoreDataSource)
 class CartFirestoreDataSourceImpl implements CartFirestoreDataSource {
   final FirebaseFirestore _firestore;
-  final ServiceLocalDataSource serviceDataSource;
-  final CarLocalDataSource carDataSource;
+  final ServiceFirestoreDataSource serviceDataSource;
+  final CarFirestoreDataSource carDataSource;
 
   CartFirestoreDataSourceImpl(
     this._firestore, {
@@ -150,7 +151,7 @@ class CartFirestoreDataSourceImpl implements CartFirestoreDataSource {
 
       for (final doc in querySnapshot.docs) {
         final data = doc.data() as Map<String, dynamic>;
-        final cartItem = await _mapToCartItem(doc.id, data);
+        final cartItem = await _mapToCartItem(doc.id, data, userId);
         if (cartItem != null) {
           cartItems.add(cartItem);
         }
@@ -211,7 +212,7 @@ class CartFirestoreDataSourceImpl implements CartFirestoreDataSource {
 
       for (final doc in snapshot.docs) {
         final data = doc.data() as Map<String, dynamic>;
-        final cartItem = await _mapToCartItem(doc.id, data);
+        final cartItem = await _mapToCartItem(doc.id, data, userId);
         if (cartItem != null) {
           cartItems.add(cartItem);
         }
@@ -223,22 +224,67 @@ class CartFirestoreDataSourceImpl implements CartFirestoreDataSource {
 
   @override
   Future<Service?> getServiceById(String serviceId) async {
-    final services = await serviceDataSource.getServices();
     try {
-      return services.firstWhere((service) => service.id == serviceId);
+      return await serviceDataSource.getServiceById(serviceId);
     } catch (e) {
+      // If Firestore service lookup fails, return null to filter out the cart item
+      // This prevents cart items with invalid service references from being displayed
       return null;
     }
   }
 
   @override
   Future<Car?> getCarById(String carId) async {
+    // This method signature doesn't match the Firestore data source which requires userId
+    // Since this is part of the abstract interface, we'll return null here
+    // and handle car fetching within _mapToCartItem where we have the userId context
+    return null;
+  }
+
+  /// Helper method to map Firestore document to CartItem entity
+  Future<CartItem?> _mapToCartItem(
+    String id,
+    Map<String, dynamic> data,
+    String userId,
+  ) async {
     try {
-      final carModel = await carDataSource.getCarById(carId);
-      if (carModel == null) return null;
+      final serviceId = data['serviceId'] as String;
+      final carId = data['carId'] as String;
+      final addedAt = DateTime.parse(data['addedAt'] as String);
+
+      // Fetch service with error handling
+      Service? service;
+      try {
+        service = await serviceDataSource.getServiceById(serviceId);
+      } catch (e) {
+        // If service can't be found, this cart item is invalid
+        print(
+          'Warning: Could not find service with ID $serviceId for cart item $id',
+        );
+        return null;
+      }
+
+      // Fetch car with error handling
+      CarModel? carModel;
+      try {
+        carModel = await carDataSource.getCarById(userId, carId);
+      } catch (e) {
+        // If car can't be found, this cart item is invalid
+        print(
+          'Warning: Could not find car with ID $carId for user $userId in cart item $id',
+        );
+        return null;
+      }
+
+      if (carModel == null) {
+        print(
+          'Warning: Car with ID $carId not found for user $userId in cart item $id',
+        );
+        return null;
+      }
 
       // Convert CarModel to Car entity
-      return Car(
+      final car = Car(
         id: carModel.id,
         make: carModel.make,
         model: carModel.model,
@@ -251,24 +297,6 @@ class CartFirestoreDataSourceImpl implements CartFirestoreDataSource {
         createdAt: carModel.createdAt,
         updatedAt: carModel.updatedAt,
       );
-    } catch (e) {
-      return null;
-    }
-  }
-
-  /// Helper method to map Firestore document to CartItem entity
-  Future<CartItem?> _mapToCartItem(String id, Map<String, dynamic> data) async {
-    try {
-      final serviceId = data['serviceId'] as String;
-      final carId = data['carId'] as String;
-      final addedAt = DateTime.parse(data['addedAt'] as String);
-
-      final service = await getServiceById(serviceId);
-      final car = await getCarById(carId);
-
-      if (service == null || car == null) {
-        return null;
-      }
 
       return CartItem(
         id: id,
@@ -280,6 +308,8 @@ class CartFirestoreDataSourceImpl implements CartFirestoreDataSource {
             : null,
       );
     } catch (e) {
+      // Log error and return null to filter out this cart item
+      print('Error mapping cart item $id: $e');
       return null;
     }
   }
@@ -288,8 +318,8 @@ class CartFirestoreDataSourceImpl implements CartFirestoreDataSource {
 @Injectable(as: BookingFirestoreDataSource)
 class BookingFirestoreDataSourceImpl implements BookingFirestoreDataSource {
   final FirebaseFirestore _firestore;
-  final ServiceLocalDataSource serviceDataSource;
-  final CarLocalDataSource carDataSource;
+  final ServiceFirestoreDataSource serviceDataSource;
+  final CarFirestoreDataSource carDataSource;
 
   BookingFirestoreDataSourceImpl(
     this._firestore, {
@@ -417,7 +447,7 @@ class BookingFirestoreDataSourceImpl implements BookingFirestoreDataSource {
 
         try {
           final service = await serviceDataSource.getServiceById(serviceId);
-          final carModel = await carDataSource.getCarById(carId);
+          final carModel = await carDataSource.getCarById(userId, carId);
 
           if (carModel != null) {
             // Convert CarModel to Car entity

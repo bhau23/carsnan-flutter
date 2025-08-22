@@ -550,7 +550,7 @@ class _CartPageState extends State<CartPage> {
                   _buildBookingDetailRow('Booking ID:', booking.id),
                   _buildBookingDetailRow(
                     'Status:',
-                    booking.status.name.toUpperCase(),
+                    _getBookingStatusDisplayName(booking.status),
                   ),
                   _buildBookingDetailRow(
                     'Total:',
@@ -652,6 +652,21 @@ class _CartPageState extends State<CartPage> {
         ],
       ),
     );
+  }
+
+  String _getBookingStatusDisplayName(BookingStatus status) {
+    switch (status) {
+      case BookingStatus.pending:
+        return 'PENDING';
+      case BookingStatus.confirmed:
+        return 'CONFIRMED';
+      case BookingStatus.inProgress:
+        return 'IN PROGRESS';
+      case BookingStatus.completed:
+        return 'COMPLETED';
+      case BookingStatus.cancelled:
+        return 'CANCELLED';
+    }
   }
 
   void _addAnotherService(BuildContext context) {

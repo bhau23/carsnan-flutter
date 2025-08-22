@@ -13,6 +13,7 @@ import '../../../profile/domain/usecases/get_user_profile_usecase.dart';
 import '../../../profile/domain/usecases/update_user_profile_usecase.dart';
 import '../../../cart/presentation/widgets/cart_icon_widget.dart';
 import '../../../cart/presentation/widgets/floating_cart_bar.dart';
+import '../../../cart/domain/entities/cart.dart';
 import '../../../address/presentation/cubit/address_cubit.dart';
 import '../../../../core/di/injection.dart';
 
@@ -243,7 +244,7 @@ class DashboardView extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
-                    order.status.name.toUpperCase(),
+                    _getStatusDisplayName(order.status),
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -263,7 +264,7 @@ class DashboardView extends StatelessWidget {
                 color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
-            if (order.status.name == 'completed') ...[
+            if (order.status == BookingStatus.completed) ...[
               const SizedBox(height: 12),
               Row(
                 children: [
@@ -282,20 +283,33 @@ class DashboardView extends StatelessWidget {
     );
   }
 
-  Color _getStatusColor(status) {
-    switch (status.name) {
-      case 'pending':
+  Color _getStatusColor(BookingStatus status) {
+    switch (status) {
+      case BookingStatus.pending:
         return Colors.orange;
-      case 'confirmed':
+      case BookingStatus.confirmed:
         return Colors.blue;
-      case 'inProgress':
+      case BookingStatus.inProgress:
         return Colors.purple;
-      case 'completed':
+      case BookingStatus.completed:
         return Colors.green;
-      case 'cancelled':
+      case BookingStatus.cancelled:
         return Colors.red;
-      default:
-        return Colors.grey;
+    }
+  }
+
+  String _getStatusDisplayName(BookingStatus status) {
+    switch (status) {
+      case BookingStatus.pending:
+        return 'PENDING';
+      case BookingStatus.confirmed:
+        return 'CONFIRMED';
+      case BookingStatus.inProgress:
+        return 'IN PROGRESS';
+      case BookingStatus.completed:
+        return 'COMPLETED';
+      case BookingStatus.cancelled:
+        return 'CANCELLED';
     }
   }
 
