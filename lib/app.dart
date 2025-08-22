@@ -4,6 +4,7 @@ import 'package:carsnan/features/car/presentation/cubit/car_cubit.dart';
 import 'package:carsnan/features/cart/presentation/cubit/cart_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../core/di/injection.dart';
 import '../core/router/app_router.dart';
@@ -19,12 +20,19 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiRepositoryProvider(
       providers: [
+        // Temporary manual registration until code generation is updated
+        RepositoryProvider<ServiceFirestoreDataSourceImpl>(
+          create: (context) =>
+              ServiceFirestoreDataSourceImpl(FirebaseFirestore.instance),
+        ),
         RepositoryProvider<ServiceLocalDataSourceImpl>(
           create: (context) => ServiceLocalDataSourceImpl(),
         ),
         RepositoryProvider<ServiceRepositoryImpl>(
-          create: (context) =>
-              ServiceRepositoryImpl(context.read<ServiceLocalDataSourceImpl>()),
+          create: (context) => ServiceRepositoryImpl(
+            context.read<ServiceFirestoreDataSourceImpl>(),
+            context.read<ServiceLocalDataSourceImpl>(),
+          ),
         ),
         RepositoryProvider<GetServicesUseCase>(
           create: (context) =>

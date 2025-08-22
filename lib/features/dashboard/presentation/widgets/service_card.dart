@@ -20,7 +20,7 @@ class ServiceCard extends StatelessWidget {
         final selectedCar = snapshot.data;
         final pricingService = getIt<DynamicPricingService>();
         final pricingInfo = pricingService.getPricingInfo(service, selectedCar);
-        
+
         return _buildServiceCard(context, pricingInfo);
       },
     );
@@ -62,7 +62,11 @@ class ServiceCard extends StatelessWidget {
                     ),
                   ),
                   // Price Tag in Bottom Right Corner
-                  Positioned(bottom: 8, right: 8, child: _buildPriceTag(pricingInfo)),
+                  Positioned(
+                    bottom: 8,
+                    right: 8,
+                    child: _buildPriceTag(pricingInfo),
+                  ),
                 ],
               ),
             ),
@@ -112,9 +116,14 @@ class ServiceCard extends StatelessWidget {
                   Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
-                          color: _getServiceColor(service.type).withValues(alpha: 0.15),
+                          color: _getServiceColor(
+                            service.type,
+                          ).withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
@@ -130,13 +139,17 @@ class ServiceCard extends StatelessWidget {
                       Icon(
                         Icons.access_time,
                         size: 14,
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: 0.6,
+                        ),
                       ),
                       const SizedBox(width: 4),
                       Text(
                         '${service.estimatedDurationInMinutes}m',
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                          color: theme.colorScheme.onSurface.withValues(
+                            alpha: 0.6,
+                          ),
                           fontSize: 12,
                         ),
                       ),
@@ -152,36 +165,37 @@ class ServiceCard extends StatelessWidget {
   }
 
   Widget _buildServiceImage() {
-    // Get the correct image path based on service type
+    // Get the correct image path based on service type or use service images
     String imagePath;
-    switch (service.type) {
-      case ServiceType.general:
-        imagePath = 'assets/images/services/general_wash.png';
-        break;
-      case ServiceType.premium:
-        imagePath = 'assets/images/services/premium_wash.png';
-        break;
-      case ServiceType.luxury:
-        imagePath = 'assets/images/services/luxury_wash.png';
-        break;
+
+    // First try to use the images from the service
+    if (service.images.isNotEmpty) {
+      imagePath = service.images.first;
+    } else {
+      // Fallback to default images based on service type
+      switch (service.type) {
+        case ServiceType.general:
+          imagePath = 'assets/images/services/general_wash.png';
+          break;
+        case ServiceType.premium:
+          imagePath = 'assets/images/services/premium_wash.png';
+          break;
+        case ServiceType.luxury:
+          imagePath = 'assets/images/services/luxury_wash.png';
+          break;
+      }
     }
 
     return Container(
       decoration: BoxDecoration(
-        image: DecorationImage(
-          image: AssetImage(imagePath),
-          fit: BoxFit.cover,
-        ),
+        image: DecorationImage(image: AssetImage(imagePath), fit: BoxFit.cover),
       ),
       child: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              Colors.transparent,
-              Colors.black.withValues(alpha: 0.3),
-            ],
+            colors: [Colors.transparent, Colors.black.withValues(alpha: 0.3)],
           ),
         ),
       ),

@@ -11,6 +11,7 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:cloud_firestore/cloud_firestore.dart' as _i974;
 import 'package:firebase_auth/firebase_auth.dart' as _i59;
+import 'package:firebase_storage/firebase_storage.dart' as _i457;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
 
@@ -128,6 +129,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i974.FirebaseFirestore>(
       () => firebaseModule.firebaseFirestore,
     );
+    gh.lazySingleton<_i457.FirebaseStorage>(
+      () => firebaseModule.firebaseStorage,
+    );
+    gh.factory<_i616.StorageService>(
+      () => _i616.StorageService(gh<_i457.FirebaseStorage>()),
+    );
     gh.factory<_i183.ServiceLocalDataSource>(
       () => _i183.ServiceLocalDataSourceImpl(),
     );
@@ -168,15 +175,21 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i339.ReviewFirestoreDataSource>(
       () => _i823.ReviewFirestoreDataSourceImpl(gh<_i974.FirebaseFirestore>()),
     );
+    gh.factory<_i183.ServiceFirestoreDataSource>(
+      () => _i183.ServiceFirestoreDataSourceImpl(gh<_i974.FirebaseFirestore>()),
+    );
+    gh.factory<_i545.ServiceRepository>(
+      () => _i579.ServiceRepositoryImpl(
+        gh<_i183.ServiceFirestoreDataSource>(),
+        gh<_i183.ServiceLocalDataSource>(),
+      ),
+    );
     gh.factory<_i1046.ProfileFirestoreDataSource>(
       () =>
           _i1046.ProfileFirestoreDataSourceImpl(gh<_i974.FirebaseFirestore>()),
     );
     gh.factory<_i742.AuthRepository>(
       () => _i317.AuthRepositoryImpl(gh<_i943.AuthRemoteDataSource>()),
-    );
-    gh.factory<_i545.ServiceRepository>(
-      () => _i579.ServiceRepositoryImpl(gh<_i183.ServiceLocalDataSource>()),
     );
     gh.factory<_i171.CarFirestoreDataSource>(
       () => _i139.CarFirestoreDataSourceImpl(gh<_i974.FirebaseFirestore>()),

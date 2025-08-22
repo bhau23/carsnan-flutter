@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+// import 'package:image_picker/image_picker.dart';
 import '../../domain/entities/user_profile.dart';
+import '../cubit/profile_cubit.dart';
 
 class ProfileHeader extends StatelessWidget {
   final UserProfile profile;
@@ -18,9 +21,7 @@ class ProfileHeader extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(24, 40, 24, 24),
-      decoration: BoxDecoration(
-        color: theme.scaffoldBackgroundColor,
-      ),
+      decoration: BoxDecoration(color: theme.scaffoldBackgroundColor),
       child: Card(
         elevation: 8,
         shadowColor: const Color(0x1AD4AF37),
@@ -90,15 +91,7 @@ class ProfileHeader extends StatelessWidget {
                           ],
                         ),
                         child: IconButton(
-                          onPressed: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: const Text('Avatar change coming soon!'),
-                                backgroundColor: const Color(0xFFD4AF37),
-                                behavior: SnackBarBehavior.floating,
-                              ),
-                            );
-                          },
+                          onPressed: () => _showImageSourceDialog(context),
                           icon: const Icon(
                             Icons.camera_alt,
                             color: Color(0xFF2C2C2C),
@@ -129,5 +122,63 @@ class ProfileHeader extends StatelessWidget {
       ),
     );
   }
-}
 
+  void _showImageSourceDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Select Image Source'),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.camera_alt, color: Color(0xFFD4AF37)),
+                title: const Text('Camera'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  context.read<ProfileCubit>().uploadProfilePicture(
+                    source: ImageSource.camera,
+                  );
+                },
+              ),
+              ListTile(
+                leading: const Icon(
+                  Icons.photo_library,
+                  color: Color(0xFFD4AF37),
+                ),
+                title: const Text('Gallery'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  context.read<ProfileCubit>().uploadProfilePicture(
+                    source: ImageSource.gallery,
+                  );
+                },
+              ),
+              if (profile.avatarUrl != null) ...[
+                const Divider(),
+                ListTile(
+                  leading: const Icon(Icons.delete, color: Colors.red),
+                  title: const Text('Remove Photo'),
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    context.read<ProfileCubit>().deleteProfilePicture();
+                  },
+                ),
+              ],
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
