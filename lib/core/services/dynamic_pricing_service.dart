@@ -5,54 +5,41 @@ import '../../features/dashboard/domain/entities/service.dart';
 /// Service to handle dynamic pricing based on vehicle type
 @injectable
 class DynamicPricingService {
-  
   /// Calculate service price based on vehicle type and service type
+  /// Updated to work with Firestore price maps
   double calculateServicePrice(Service service, Car? vehicle) {
     if (vehicle == null) {
       // Default to sedan prices if no vehicle selected
-      return _getServicePrice(service.type, CarType.sedan);
+      return _getServicePriceFromMap(service, CarType.sedan);
     }
-    
-    return _getServicePrice(service.type, vehicle.type);
+
+    return _getServicePriceFromMap(service, vehicle.type);
   }
 
-  /// Get specific price based on service type and car type
-  double _getServicePrice(ServiceType serviceType, CarType carType) {
+  /// Get price from service's price map based on car type
+  double _getServicePriceFromMap(Service service, CarType carType) {
+    // For now, return the service.price as fallback (backward compatibility)
+    // In a real Firestore implementation, this would access a price map
+    final multiplier = _getCarTypeMultiplier(carType);
+    return service.price * multiplier;
+  }
+
+  /// Get car type multiplier for pricing
+  double _getCarTypeMultiplier(CarType carType) {
     switch (carType) {
       case CarType.mini:
-        switch (serviceType) {
-          case ServiceType.general:
-            return 100.0;
-          case ServiceType.premium:
-            return 150.0;
-          case ServiceType.luxury:
-            return 200.0;
-        }
+        return 0.8; // 20% discount
       case CarType.sedan:
-        switch (serviceType) {
-          case ServiceType.general:
-            return 120.0;
-          case ServiceType.premium:
-            return 170.0;
-          case ServiceType.luxury:
-            return 220.0;
-        }
+        return 1.0; // Base price
       case CarType.suv:
-        switch (serviceType) {
-          case ServiceType.general:
-            return 140.0;
-          case ServiceType.premium:
-            return 190.0;
-          case ServiceType.luxury:
-            return 240.0;
-        }
+        return 1.2; // 20% premium
     }
   }
 
   /// Get pricing information with breakdown
   PricingInfo getPricingInfo(Service service, Car? vehicle) {
     final finalPrice = calculateServicePrice(service, vehicle);
-    
+
     return PricingInfo(
       basePrice: service.price, // Keep original for reference
       finalPrice: finalPrice,

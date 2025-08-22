@@ -4,10 +4,7 @@ import '../../domain/entities/wash_type.dart';
 class WashTypeInfoDialog extends StatefulWidget {
   final WashType washType;
 
-  const WashTypeInfoDialog({
-    super.key,
-    required this.washType,
-  });
+  const WashTypeInfoDialog({super.key, required this.washType});
 
   static Future<void> show(BuildContext context, WashType washType) {
     return showGeneralDialog(
@@ -24,10 +21,7 @@ class WashTypeInfoDialog extends StatefulWidget {
           position: Tween(
             begin: const Offset(0, 1),
             end: const Offset(0, 0),
-          ).animate(CurvedAnimation(
-            parent: anim1,
-            curve: Curves.easeOutCubic,
-          )),
+          ).animate(CurvedAnimation(parent: anim1, curve: Curves.easeOutCubic)),
           child: child,
         );
       },
@@ -51,23 +45,17 @@ class _WashTypeInfoDialogState extends State<WashTypeInfoDialog>
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    
+
     _scaleAnimation = Tween<double>(
       begin: 0.8,
       end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeOutBack,
-    ));
-    
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutBack));
+
     _fadeAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeOut,
-    ));
-    
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+
     _controller.forward();
   }
 
@@ -103,7 +91,7 @@ class _WashTypeInfoDialogState extends State<WashTypeInfoDialog>
                     borderRadius: BorderRadius.circular(24),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.3),
+                        color: Colors.black.withAlpha(90),
                         blurRadius: 20,
                         spreadRadius: 5,
                       ),
@@ -114,7 +102,7 @@ class _WashTypeInfoDialogState extends State<WashTypeInfoDialog>
                     children: [
                       // Header with close button
                       _buildHeader(context, theme),
-                      
+
                       // Content
                       Flexible(
                         child: SingleChildScrollView(
@@ -124,14 +112,14 @@ class _WashTypeInfoDialogState extends State<WashTypeInfoDialog>
                             children: [
                               // Image placeholder
                               _buildImageSection(theme),
-                              
+
                               const SizedBox(height: 24),
-                              
+
                               // Description
                               _buildDescriptionSection(theme),
-                              
+
                               const SizedBox(height: 24),
-                              
+
                               // Benefits
                               _buildBenefitsSection(theme),
                             ],
@@ -156,10 +144,7 @@ class _WashTypeInfoDialogState extends State<WashTypeInfoDialog>
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            Color(0xFFFFD700),
-            Color(0xFFD4AF37),
-          ],
+          colors: [Color(0xFFFFD700), Color(0xFFD4AF37)],
         ),
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(24),
@@ -185,7 +170,7 @@ class _WashTypeInfoDialogState extends State<WashTypeInfoDialog>
               size: 28,
             ),
             style: IconButton.styleFrom(
-              backgroundColor: Colors.white.withOpacity(0.2),
+              backgroundColor: Colors.white.withAlpha(100),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -205,28 +190,22 @@ class _WashTypeInfoDialogState extends State<WashTypeInfoDialog>
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            theme.primaryColor.withOpacity(0.1),
-            theme.primaryColor.withOpacity(0.05),
+            theme.primaryColor.withAlpha(50),
+            theme.primaryColor.withAlpha(25),
           ],
         ),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: theme.dividerColor.withOpacity(0.3),
-        ),
+        border: Border.all(color: theme.dividerColor.withAlpha(76)),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            _getWashTypeIcon(),
-            size: 64,
-            color: theme.primaryColor,
-          ),
+          Icon(_getWashTypeIcon(), size: 64, color: theme.primaryColor),
           const SizedBox(height: 12),
           Text(
             'Sample Image',
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurface.withOpacity(0.6),
+              color: theme.colorScheme.onSurface.withAlpha(125),
             ),
           ),
         ],
@@ -250,7 +229,7 @@ class _WashTypeInfoDialogState extends State<WashTypeInfoDialog>
           widget.washType.description,
           style: theme.textTheme.bodyLarge?.copyWith(
             height: 1.6,
-            color: theme.colorScheme.onSurface.withOpacity(0.8),
+            color: theme.colorScheme.onSurface.withAlpha(204),
           ),
         ),
       ],
@@ -269,31 +248,33 @@ class _WashTypeInfoDialogState extends State<WashTypeInfoDialog>
           ),
         ),
         const SizedBox(height: 12),
-        ...widget.washType.benefits.map((benefit) => Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                margin: const EdgeInsets.only(top: 6, right: 12),
-                width: 6,
-                height: 6,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.primary,
-                  shape: BoxShape.circle,
-                ),
-              ),
-              Expanded(
-                child: Text(
-                  benefit,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurface.withOpacity(0.8),
+        ...widget.washType.benefits.map(
+          (benefit) => Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  margin: const EdgeInsets.only(top: 6, right: 12),
+                  width: 6,
+                  height: 6,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primary,
+                    shape: BoxShape.circle,
                   ),
                 ),
-              ),
-            ],
+                Expanded(
+                  child: Text(
+                    benefit,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurface.withAlpha(204),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
-        )),
+        ),
       ],
     );
   }

@@ -1,5 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+import '../../domain/entities/user.dart';
+import '../../../profile/domain/entities/user_profile.dart';
 
 part 'auth_event.freezed.dart';
 
@@ -28,6 +30,10 @@ class AuthEvent with _$AuthEvent {
   // Legacy phone auth events (for backward compatibility)
   const factory AuthEvent.sendOtp({required String phoneNumber}) = SendOtp;
   const factory AuthEvent.verifyOtp({required String otp}) = VerifyOtp;
+
+  // Profile completion events
+  const factory AuthEvent.checkProfileCompletion({required User user}) = CheckProfileCompletion;
+  const factory AuthEvent.completeProfile({required UserProfile userProfile}) = CompleteProfile;
 
   // Common events
   const factory AuthEvent.signOut() = SignOut;

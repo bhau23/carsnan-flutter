@@ -107,3 +107,55 @@ class AddonService {
     return getPopularAddons();
   }
 }
+
+// Storage service implementation moved to separate file: storage_service.dart
+
+// STORAGE SERVICE CONTENT FOR CREATION:
+/*
+import 'dart:io';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:injectable/injectable.dart';
+
+@injectable
+class StorageService {
+  final FirebaseStorage _storage;
+
+  StorageService(this._storage);
+
+  /// Uploads a profile picture to Firebase Storage
+  /// Returns the download URL of the uploaded image
+  Future<String> uploadProfilePicture(File image, String userId) async {
+    try {
+      // Create reference to the storage location
+      final ref = _storage.ref().child('profile_pictures').child(userId).child('profile.jpg');
+      
+      // Upload the file
+      final uploadTask = ref.putFile(image);
+      
+      // Wait for upload to complete
+      final snapshot = await uploadTask.whenComplete(() => {});
+      
+      // Get the download URL
+      final downloadUrl = await snapshot.ref.getDownloadURL();
+      
+      return downloadUrl;
+    } catch (e) {
+      throw Exception('Failed to upload profile picture: $e');
+    }
+  }
+
+  /// Deletes a profile picture from Firebase Storage
+  Future<void> deleteProfilePicture(String userId) async {
+    try {
+      final ref = _storage.ref().child('profile_pictures').child(userId).child('profile.jpg');
+      await ref.delete();
+    } catch (e) {
+      // If file doesn't exist, that's fine
+      if (e is FirebaseException && e.code == 'object-not-found') {
+        return;
+      }
+      throw Exception('Failed to delete profile picture: $e');
+    }
+  }
+}
+*/

@@ -1,27 +1,38 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../domain/entities/user_profile.dart';
 
 class UserProfileModel extends UserProfile {
   const UserProfileModel({
-    required super.id,
-    required super.name,
-    required super.email,
-    required super.mobile,
-    required super.address,
-    super.avatarUrl,
+    required super.uid,
+    super.email,
+    super.phoneNumber,
+    required super.displayName,
+    super.photoURL,
+    super.role = 'client',
+    super.isProfileComplete = false,
+    required super.createdAt,
+    super.address,
     super.dateOfBirth,
     super.gender,
   });
 
   factory UserProfileModel.fromJson(Map<String, dynamic> json) {
     return UserProfileModel(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      email: json['email'] as String,
-      mobile: json['mobile'] as String,
-      address: json['address'] as String,
-      avatarUrl: json['avatarUrl'] as String?,
+      uid: json['uid'] as String,
+      email: json['email'] as String?,
+      phoneNumber: json['phoneNumber'] as String?,
+      displayName: json['displayName'] as String,
+      photoURL: json['photoURL'] as String?,
+      role: json['role'] as String? ?? 'client',
+      isProfileComplete: json['isProfileComplete'] as bool? ?? false,
+      createdAt: json['createdAt'] is Timestamp
+          ? (json['createdAt'] as Timestamp).toDate()
+          : DateTime.parse(json['createdAt'] as String),
+      address: json['address'] as String?,
       dateOfBirth: json['dateOfBirth'] != null
-          ? DateTime.parse(json['dateOfBirth'] as String)
+          ? json['dateOfBirth'] is Timestamp
+              ? (json['dateOfBirth'] as Timestamp).toDate()
+              : DateTime.parse(json['dateOfBirth'] as String)
           : null,
       gender: json['gender'] as String?,
     );
@@ -29,27 +40,53 @@ class UserProfileModel extends UserProfile {
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
-      'name': name,
+      'uid': uid,
       'email': email,
-      'mobile': mobile,
+      'phoneNumber': phoneNumber,
+      'displayName': displayName,
+      'photoURL': photoURL,
+      'role': role,
+      'isProfileComplete': isProfileComplete,
+      'createdAt': Timestamp.fromDate(createdAt),
       'address': address,
-      'avatarUrl': avatarUrl,
-      'dateOfBirth': dateOfBirth?.toIso8601String(),
+      'dateOfBirth': dateOfBirth != null ? Timestamp.fromDate(dateOfBirth!) : null,
       'gender': gender,
     };
   }
 
   factory UserProfileModel.fromEntity(UserProfile profile) {
     return UserProfileModel(
-      id: profile.id,
-      name: profile.name,
+      uid: profile.uid,
       email: profile.email,
-      mobile: profile.mobile,
+      phoneNumber: profile.phoneNumber,
+      displayName: profile.displayName,
+      photoURL: profile.photoURL,
+      role: profile.role,
+      isProfileComplete: profile.isProfileComplete,
+      createdAt: profile.createdAt,
       address: profile.address,
-      avatarUrl: profile.avatarUrl,
       dateOfBirth: profile.dateOfBirth,
       gender: profile.gender,
+    );
+  }
+
+  // Legacy support - create from Firebase Auth User
+  factory UserProfileModel.fromFirebaseUser({
+    required String uid,
+    String? email,
+    String? phoneNumber,
+    String? displayName,
+    String? photoURL,
+  }) {
+    return UserProfileModel(
+      uid: uid,
+      email: email,
+      phoneNumber: phoneNumber,
+      displayName: displayName ?? 'User',
+      photoURL: photoURL,
+      role: 'client',
+      isProfileComplete: false,
+      createdAt: DateTime.now(),
     );
   }
 }

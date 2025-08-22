@@ -12,6 +12,8 @@ import 'package:carsnan/features/authentication/domain/usecases/verify_otp_useca
 import 'package:carsnan/features/authentication/presentation/bloc/auth_bloc.dart';
 import 'package:carsnan/features/authentication/presentation/bloc/auth_event.dart';
 import 'package:carsnan/features/authentication/presentation/bloc/auth_state.dart';
+import 'package:carsnan/features/profile/domain/usecases/get_user_profile_usecase.dart';
+import 'package:carsnan/features/profile/domain/usecases/update_user_profile_usecase.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -34,6 +36,12 @@ class MockEnrollMfaUseCase extends Mock implements EnrollMfaUseCase {}
 
 class MockVerifyMfaUseCase extends Mock implements VerifyMfaUseCase {}
 
+class MockGetUserProfileUseCase extends Mock implements GetUserProfileUseCase {}
+
+class MockCreateUserProfileUseCase extends Mock implements CreateUserProfileUseCase {}
+
+class MockUpdateUserProfileUseCase extends Mock implements UpdateUserProfileUseCase {}
+
 void main() {
   late AuthBloc authBloc;
   late MockSendOtpUseCase mockSendOtpUseCase;
@@ -44,6 +52,9 @@ void main() {
   late MockSignUpWithEmailUseCase mockSignUpWithEmailUseCase;
   late MockEnrollMfaUseCase mockEnrollMfaUseCase;
   late MockVerifyMfaUseCase mockVerifyMfaUseCase;
+  late MockGetUserProfileUseCase mockGetUserProfileUseCase;
+  late MockCreateUserProfileUseCase mockCreateUserProfileUseCase;
+  late MockUpdateUserProfileUseCase mockUpdateUserProfileUseCase;
 
   setUp(() {
     mockSendOtpUseCase = MockSendOtpUseCase();
@@ -54,6 +65,9 @@ void main() {
     mockSignUpWithEmailUseCase = MockSignUpWithEmailUseCase();
     mockEnrollMfaUseCase = MockEnrollMfaUseCase();
     mockVerifyMfaUseCase = MockVerifyMfaUseCase();
+    mockGetUserProfileUseCase = MockGetUserProfileUseCase();
+    mockCreateUserProfileUseCase = MockCreateUserProfileUseCase();
+    mockUpdateUserProfileUseCase = MockUpdateUserProfileUseCase();
 
     authBloc = AuthBloc(
       mockSendOtpUseCase,
@@ -64,6 +78,9 @@ void main() {
       mockSignUpWithEmailUseCase,
       mockEnrollMfaUseCase,
       mockVerifyMfaUseCase,
+      mockGetUserProfileUseCase,
+      mockCreateUserProfileUseCase,
+      mockUpdateUserProfileUseCase,
     );
   });
 

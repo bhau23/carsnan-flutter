@@ -7,11 +7,11 @@ class AddonProductCard extends StatefulWidget {
   final ValueChanged<int> onQuantityChanged;
 
   const AddonProductCard({
-    Key? key,
+    super.key,
     required this.product,
     required this.quantity,
     required this.onQuantityChanged,
-  }) : super(key: key);
+  });
 
   @override
   State<AddonProductCard> createState() => _AddonProductCardState();
@@ -29,13 +29,9 @@ class _AddonProductCardState extends State<AddonProductCard>
       duration: const Duration(milliseconds: 200),
       vsync: this,
     );
-    _scaleAnimation = Tween<double>(
-      begin: 1.0,
-      end: 1.05,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.05).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
   }
 
   @override
@@ -53,7 +49,7 @@ class _AddonProductCardState extends State<AddonProductCard>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return AnimatedBuilder(
       animation: _scaleAnimation,
       builder: (context, child) {
@@ -86,7 +82,8 @@ class _AddonProductCardState extends State<AddonProductCard>
                       height: 80,
                       width: double.infinity,
                       decoration: BoxDecoration(
-                        color: theme.colorScheme.surfaceVariant.withValues(alpha: 0.3),
+                        color: theme.colorScheme.surfaceContainerHighest
+                            .withValues(alpha: 0.3),
                         borderRadius: const BorderRadius.only(
                           topLeft: Radius.circular(16),
                           topRight: Radius.circular(16),
@@ -107,8 +104,12 @@ class _AddonProductCardState extends State<AddonProductCard>
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight,
                                   colors: [
-                                    theme.colorScheme.primary.withValues(alpha: 0.1),
-                                    theme.colorScheme.secondary.withValues(alpha: 0.1),
+                                    theme.colorScheme.primary.withValues(
+                                      alpha: 0.1,
+                                    ),
+                                    theme.colorScheme.secondary.withValues(
+                                      alpha: 0.1,
+                                    ),
                                   ],
                                 ),
                               ),
@@ -116,7 +117,9 @@ class _AddonProductCardState extends State<AddonProductCard>
                                 child: Icon(
                                   _getCategoryIcon(widget.product.category),
                                   size: 32,
-                                  color: theme.colorScheme.primary.withValues(alpha: 0.7),
+                                  color: theme.colorScheme.primary.withValues(
+                                    alpha: 0.7,
+                                  ),
                                 ),
                               ),
                             );
@@ -149,7 +152,7 @@ class _AddonProductCardState extends State<AddonProductCard>
                       ),
                   ],
                 ),
-                
+
                 // Product Details
                 Expanded(
                   child: Padding(
@@ -167,9 +170,9 @@ class _AddonProductCardState extends State<AddonProductCard>
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        
+
                         const SizedBox(height: 2),
-                        
+
                         // Product Description
                         Text(
                           widget.product.description,
@@ -180,9 +183,9 @@ class _AddonProductCardState extends State<AddonProductCard>
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        
+
                         const Spacer(),
-                        
+
                         // Price and Add Button
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -223,11 +226,7 @@ class _AddonProductCardState extends State<AddonProductCard>
             color: theme.colorScheme.primary,
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Icon(
-            Icons.add,
-            size: 16,
-            color: theme.colorScheme.onPrimary,
-          ),
+          child: Icon(Icons.add, size: 16, color: theme.colorScheme.onPrimary),
         ),
       );
     }

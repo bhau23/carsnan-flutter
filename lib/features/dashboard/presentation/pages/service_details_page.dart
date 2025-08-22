@@ -34,6 +34,12 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
 
   // Multiple banner images for each service
   List<String> get _bannerImages {
+    // Use the images array from the new Service structure
+    if (widget.service.images.isNotEmpty) {
+      return widget.service.images;
+    }
+
+    // Fallback to default images based on service type (for backward compatibility)
     switch (widget.service.type) {
       case ServiceType.general:
         return [
@@ -405,7 +411,10 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
             builder: (context, snapshot) {
               final selectedCar = snapshot.data;
               final pricingService = getIt<DynamicPricingService>();
-              final dynamicPrice = pricingService.calculateServicePrice(widget.service, selectedCar);
+              final dynamicPrice = pricingService.calculateServicePrice(
+                widget.service,
+                selectedCar,
+              );
 
               return Row(
                 children: [
@@ -530,8 +539,11 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
           builder: (context, snapshot) {
             final selectedCar = snapshot.data;
             final pricingService = getIt<DynamicPricingService>();
-            final pricingInfo = pricingService.getPricingInfo(widget.service, selectedCar);
-            
+            final pricingInfo = pricingService.getPricingInfo(
+              widget.service,
+              selectedCar,
+            );
+
             return Row(
               children: [
                 // Left side - Price and duration with vehicle info
@@ -564,9 +576,9 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                 Expanded(
                   flex: 3,
                   child: ElevatedButton(
-                    onPressed: selectedCar != null 
-                      ? () => _addToCartDirectly(context, selectedCar)
-                      : () => _showSelectVehicleMessage(context),
+                    onPressed: selectedCar != null
+                        ? () => _addToCartDirectly(context, selectedCar)
+                        : () => _showSelectVehicleMessage(context),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: theme.colorScheme.primary,
                       foregroundColor: theme.colorScheme.onPrimary,
@@ -577,7 +589,10 @@ class _ServiceDetailsPageState extends State<ServiceDetailsPage> {
                     ),
                     child: Text(
                       _getButtonText(selectedCar),
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),

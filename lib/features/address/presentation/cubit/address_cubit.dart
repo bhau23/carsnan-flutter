@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:injectable/injectable.dart';
 import '../../domain/entities/address.dart';
 import '../../domain/usecases/get_addresses_usecase.dart';
 import '../../domain/usecases/add_address_usecase.dart';
@@ -6,6 +7,7 @@ import '../../domain/usecases/set_default_address_usecase.dart';
 import '../../../../core/services/location_service.dart';
 import 'address_state.dart';
 
+@injectable
 class AddressCubit extends Cubit<AddressState> {
   final GetAddressesUseCase getAddressesUseCase;
   final AddAddressUseCase addAddressUseCase;
@@ -22,32 +24,26 @@ class AddressCubit extends Cubit<AddressState> {
   /// Load all addresses
   Future<void> loadAddresses() async {
     emit(const AddressLoading());
-    
+
     final result = await getAddressesUseCase();
-    
-    result.fold(
-      (failure) => emit(AddressError(failure.message)),
-      (addresses) {
-        final defaultAddress = addresses.isEmpty 
-            ? null 
-            : addresses.firstWhere(
-                (addr) => addr.isDefault,
-                orElse: () => addresses.first,
-              );
-        emit(AddressLoaded(
-          addresses: addresses,
-          defaultAddress: defaultAddress,
-        ));
-      },
-    );
+
+    result.fold((failure) => emit(AddressError(failure.message)), (addresses) {
+      final defaultAddress = addresses.isEmpty
+          ? null
+          : addresses.firstWhere(
+              (addr) => addr.isDefault,
+              orElse: () => addresses.first,
+            );
+      emit(AddressLoaded(addresses: addresses, defaultAddress: defaultAddress));
+    });
   }
 
   /// Get current location
   Future<void> getCurrentLocation() async {
     emit(const LocationLoading());
-    
+
     final result = await locationService.getCurrentLocation();
-    
+
     result.fold(
       (failure) => emit(AddressError(failure.message)),
       (location) => emit(LocationLoaded(location: location)),
@@ -62,9 +58,9 @@ class AddressCubit extends Cubit<AddressState> {
     }
 
     emit(const AddressLoading());
-    
+
     final result = await locationService.searchAddresses(query);
-    
+
     result.fold(
       (failure) => emit(AddressError(failure.message)),
       (results) => emit(SearchResults(results: results, query: query)),
@@ -74,24 +70,23 @@ class AddressCubit extends Cubit<AddressState> {
   /// Add new address
   Future<void> addAddress(Address address) async {
     emit(const AddingAddress());
-    
+
     final result = await addAddressUseCase(address);
-    
-    result.fold(
-      (failure) => emit(AddressError(failure.message)),
-      (savedAddress) async {
-        // Directly reload addresses instead of emitting AddressAdded
-        await loadAddresses();
-      },
-    );
+
+    result.fold((failure) => emit(AddressError(failure.message)), (
+      savedAddress,
+    ) async {
+      // Directly reload addresses instead of emitting AddressAdded
+      await loadAddresses();
+    });
   }
 
   /// Set default address
   Future<void> setDefaultAddress(String addressId) async {
     emit(const AddressLoading());
-    
+
     final result = await setDefaultAddressUseCase(addressId);
-    
+
     result.fold(
       (failure) => emit(AddressError(failure.message)),
       (_) => loadAddresses(), // Reload to update default status

@@ -1,6 +1,6 @@
+import 'package:carsnan/core/di/injection.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/services/dynamic_pricing_service.dart';
-import '../../../../core/injection/injection.dart';
 import '../../domain/entities/cart.dart';
 import '../../../dashboard/domain/entities/service.dart';
 import '../../../car/domain/entities/car.dart';
@@ -20,7 +20,10 @@ class CartItemWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final pricingService = getIt<DynamicPricingService>();
-    final finalPrice = pricingService.calculateServicePrice(cartItem.service, cartItem.car);
+    final finalPrice = pricingService.calculateServicePrice(
+      cartItem.service,
+      cartItem.car,
+    );
 
     return Card(
       elevation: 2,
@@ -99,6 +102,67 @@ class CartItemWidget extends StatelessWidget {
                           ),
                         ),
                       ),
+                      // Display time slot if available
+                      if (cartItem.timeSlot != null) ...[
+                        const SizedBox(height: 4),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.primary.withValues(
+                              alpha: 0.1,
+                            ),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(
+                              color: theme.colorScheme.primary.withValues(
+                                alpha: 0.3,
+                              ),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.schedule,
+                                size: 12,
+                                color: theme.colorScheme.primary,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                '${cartItem.timeSlot!.dayLabel} ${cartItem.timeSlot!.shortTimeRange}',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.colorScheme.primary,
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 11,
+                                ),
+                              ),
+                              if (cartItem.timeSlot!.discount != null) ...[
+                                const SizedBox(width: 6),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 4,
+                                    vertical: 1,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.green,
+                                    borderRadius: BorderRadius.circular(3),
+                                  ),
+                                  child: Text(
+                                    '${cartItem.timeSlot!.discount!.toInt()}% OFF',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 8,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),

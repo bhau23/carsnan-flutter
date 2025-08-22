@@ -14,11 +14,11 @@ class TimeSlotSelectionPage extends StatefulWidget {
   final WashType washType;
 
   const TimeSlotSelectionPage({
-    Key? key,
+    super.key,
     required this.service,
     required this.car,
     required this.washType,
-  }) : super(key: key);
+  });
 
   @override
   State<TimeSlotSelectionPage> createState() => _TimeSlotSelectionPageState();
@@ -27,33 +27,33 @@ class TimeSlotSelectionPage extends StatefulWidget {
 class _TimeSlotSelectionPageState extends State<TimeSlotSelectionPage>
     with TickerProviderStateMixin {
   final TimeSlotService _timeSlotService = TimeSlotService();
-  
+
   DateTime? _selectedDate;
   TimeSlot? _selectedSlot;
   late List<DateTime> _availableDates;
   late AnimationController _slideController;
   late AnimationController _fadeController;
-  
+
   @override
   void initState() {
     super.initState();
     _availableDates = _timeSlotService.getAvailableDates();
     _selectedDate = _availableDates.first;
-    
+
     _slideController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    
+
     _fadeController = AnimationController(
       duration: const Duration(milliseconds: 200),
       vsync: this,
     );
-    
+
     _slideController.forward();
     _fadeController.forward();
   }
-  
+
   @override
   void dispose() {
     _slideController.dispose();
@@ -64,9 +64,9 @@ class _TimeSlotSelectionPageState extends State<TimeSlotSelectionPage>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Scaffold(
-      backgroundColor: theme.colorScheme.background,
+      backgroundColor: theme.colorScheme.surface,
       appBar: AppBar(
         title: const Text('Select Slot'),
         backgroundColor: Colors.transparent,
@@ -77,13 +77,13 @@ class _TimeSlotSelectionPageState extends State<TimeSlotSelectionPage>
         ),
       ),
       body: SlideTransition(
-        position: Tween<Offset>(
-          begin: const Offset(0, 0.3),
-          end: Offset.zero,
-        ).animate(CurvedAnimation(
-          parent: _slideController,
-          curve: Curves.easeOutBack,
-        )),
+        position: Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero)
+            .animate(
+              CurvedAnimation(
+                parent: _slideController,
+                curve: Curves.easeOutBack,
+              ),
+            ),
         child: FadeTransition(
           opacity: _fadeController,
           child: Column(
@@ -120,7 +120,7 @@ class _TimeSlotSelectionPageState extends State<TimeSlotSelectionPage>
           'Select the Date for your Service',
           style: theme.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.bold,
-            color: theme.colorScheme.onBackground,
+            color: theme.colorScheme.onSurface,
           ),
         ),
         const SizedBox(height: 16),
@@ -132,10 +132,13 @@ class _TimeSlotSelectionPageState extends State<TimeSlotSelectionPage>
             separatorBuilder: (context, index) => const SizedBox(width: 12),
             itemBuilder: (context, index) {
               final date = _availableDates[index];
-              final isSelected = _selectedDate?.day == date.day && 
-                                _selectedDate?.month == date.month;
-              final availableCount = _timeSlotService.getAvailableSlotCount(date);
-              
+              final isSelected =
+                  _selectedDate?.day == date.day &&
+                  _selectedDate?.month == date.month;
+              final availableCount = _timeSlotService.getAvailableSlotCount(
+                date,
+              );
+
               return _buildDateCard(date, isSelected, availableCount, theme);
             },
           ),
@@ -144,11 +147,17 @@ class _TimeSlotSelectionPageState extends State<TimeSlotSelectionPage>
     );
   }
 
-  Widget _buildDateCard(DateTime date, bool isSelected, int availableCount, ThemeData theme) {
-    final isToday = DateTime.now().day == date.day && 
-                    DateTime.now().month == date.month &&
-                    DateTime.now().year == date.year;
-    
+  Widget _buildDateCard(
+    DateTime date,
+    bool isSelected,
+    int availableCount,
+    ThemeData theme,
+  ) {
+    final isToday =
+        DateTime.now().day == date.day &&
+        DateTime.now().month == date.month &&
+        DateTime.now().year == date.year;
+
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -160,12 +169,12 @@ class _TimeSlotSelectionPageState extends State<TimeSlotSelectionPage>
         duration: const Duration(milliseconds: 200),
         width: 80,
         decoration: BoxDecoration(
-          color: isSelected 
+          color: isSelected
               ? theme.colorScheme.primary.withValues(alpha: 0.15)
               : theme.colorScheme.surface,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected 
+            color: isSelected
                 ? theme.colorScheme.primary
                 : theme.colorScheme.outline.withValues(alpha: 0.2),
             width: isSelected ? 2 : 1,
@@ -178,7 +187,7 @@ class _TimeSlotSelectionPageState extends State<TimeSlotSelectionPage>
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
-                color: availableCount > 0 
+                color: availableCount > 0
                     ? Colors.green.withValues(alpha: 0.2)
                     : Colors.red.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(8),
@@ -201,7 +210,7 @@ class _TimeSlotSelectionPageState extends State<TimeSlotSelectionPage>
               date.day.toString(),
               style: theme.textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: isSelected 
+                color: isSelected
                     ? theme.colorScheme.primary
                     : theme.colorScheme.onSurface,
               ),
@@ -221,14 +230,18 @@ class _TimeSlotSelectionPageState extends State<TimeSlotSelectionPage>
 
   Widget _buildTimeSlotSection(ThemeData theme) {
     if (_selectedDate == null) return const SizedBox.shrink();
-    
+
     final todaySlots = _timeSlotService.getSlotsForDate(_selectedDate!);
     final tomorrowDate = _selectedDate!.add(const Duration(days: 1));
     final tomorrowSlots = _timeSlotService.getSlotsForDate(tomorrowDate);
-    
-    final availableTodaySlots = todaySlots.where((slot) => slot.isAvailable).toList();
-    final availableTomorrowSlots = tomorrowSlots.where((slot) => slot.isAvailable).toList();
-    
+
+    final availableTodaySlots = todaySlots
+        .where((slot) => slot.isAvailable)
+        .toList();
+    final availableTomorrowSlots = tomorrowSlots
+        .where((slot) => slot.isAvailable)
+        .toList();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -236,7 +249,7 @@ class _TimeSlotSelectionPageState extends State<TimeSlotSelectionPage>
           'Select the start time for your service',
           style: theme.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.bold,
-            color: theme.colorScheme.onBackground,
+            color: theme.colorScheme.onSurface,
           ),
         ),
         Text(
@@ -246,25 +259,25 @@ class _TimeSlotSelectionPageState extends State<TimeSlotSelectionPage>
           ),
         ),
         const SizedBox(height: 20),
-        
+
         // Today's slots
         _buildSlotSection(
           'Today (${availableTodaySlots.length} slots available)',
           availableTodaySlots,
           theme,
         ),
-        
+
         const SizedBox(height: 20),
-        
-        // Tomorrow's slots  
+
+        // Tomorrow's slots
         _buildSlotSection(
           'Tomorrow (${availableTomorrowSlots.length} slots available)',
           availableTomorrowSlots,
           theme,
         ),
-        
+
         const SizedBox(height: 16),
-        
+
         // Suggestion box
         Container(
           padding: const EdgeInsets.all(16),
@@ -297,7 +310,11 @@ class _TimeSlotSelectionPageState extends State<TimeSlotSelectionPage>
     );
   }
 
-  Widget _buildSlotSection(String title, List<TimeSlot> slots, ThemeData theme) {
+  Widget _buildSlotSection(
+    String title,
+    List<TimeSlot> slots,
+    ThemeData theme,
+  ) {
     if (slots.isEmpty) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -306,7 +323,7 @@ class _TimeSlotSelectionPageState extends State<TimeSlotSelectionPage>
             title,
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.bold,
-              color: theme.colorScheme.onBackground,
+              color: theme.colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 12),
@@ -316,7 +333,9 @@ class _TimeSlotSelectionPageState extends State<TimeSlotSelectionPage>
             decoration: BoxDecoration(
               color: theme.colorScheme.surface,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.2)),
+              border: Border.all(
+                color: theme.colorScheme.outline.withValues(alpha: 0.2),
+              ),
             ),
             child: Column(
               children: [
@@ -348,14 +367,16 @@ class _TimeSlotSelectionPageState extends State<TimeSlotSelectionPage>
           title,
           style: theme.textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.bold,
-            color: theme.colorScheme.onBackground,
+            color: theme.colorScheme.onSurface,
           ),
         ),
         const SizedBox(height: 12),
         Wrap(
           spacing: 12,
           runSpacing: 12,
-          children: slots.map((slot) => _buildTimeSlotCard(slot, theme)).toList(),
+          children: slots
+              .map((slot) => _buildTimeSlotCard(slot, theme))
+              .toList(),
         ),
       ],
     );
@@ -363,7 +384,7 @@ class _TimeSlotSelectionPageState extends State<TimeSlotSelectionPage>
 
   Widget _buildTimeSlotCard(TimeSlot slot, ThemeData theme) {
     final isSelected = _selectedSlot == slot;
-    
+
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -374,12 +395,12 @@ class _TimeSlotSelectionPageState extends State<TimeSlotSelectionPage>
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected 
+          color: isSelected
               ? theme.colorScheme.primary
               : theme.colorScheme.surface,
           borderRadius: BorderRadius.circular(25),
           border: Border.all(
-            color: isSelected 
+            color: isSelected
                 ? theme.colorScheme.primary
                 : theme.colorScheme.outline.withValues(alpha: 0.3),
             width: isSelected ? 2 : 1,
@@ -409,7 +430,7 @@ class _TimeSlotSelectionPageState extends State<TimeSlotSelectionPage>
             Text(
               slot.shortTimeRange,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: isSelected 
+                color: isSelected
                     ? theme.colorScheme.onPrimary
                     : theme.colorScheme.onSurface,
                 fontWeight: FontWeight.w500,
@@ -425,7 +446,7 @@ class _TimeSlotSelectionPageState extends State<TimeSlotSelectionPage>
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceVariant.withValues(alpha: 0.3),
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -488,15 +509,15 @@ class _TimeSlotSelectionPageState extends State<TimeSlotSelectionPage>
                 ],
               ),
             ),
-            
+
             const SizedBox(width: 16),
-            
-            // Right side - Checkout button
+
+            // Right side - Add to Cart button
             Expanded(
               flex: 3,
               child: ElevatedButton(
-                onPressed: _selectedSlot != null 
-                    ? () => _proceedToCheckout(context)
+                onPressed: _selectedSlot != null
+                    ? () => _addToCart(context)
                     : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: theme.colorScheme.primary,
@@ -505,25 +526,27 @@ class _TimeSlotSelectionPageState extends State<TimeSlotSelectionPage>
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  disabledBackgroundColor: theme.colorScheme.outline.withValues(alpha: 0.3),
+                  disabledBackgroundColor: theme.colorScheme.outline.withValues(
+                    alpha: 0.3,
+                  ),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Checkout',
+                      'Add to Cart',
                       style: TextStyle(
-                        fontSize: 16, 
+                        fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: _selectedSlot != null 
+                        color: _selectedSlot != null
                             ? theme.colorScheme.onPrimary
                             : theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
                     const SizedBox(width: 8),
                     Icon(
-                      Icons.arrow_forward,
-                      color: _selectedSlot != null 
+                      Icons.shopping_cart_outlined,
+                      color: _selectedSlot != null
                           ? theme.colorScheme.onPrimary
                           : theme.colorScheme.onSurfaceVariant,
                     ),
@@ -537,22 +560,26 @@ class _TimeSlotSelectionPageState extends State<TimeSlotSelectionPage>
     );
   }
 
-  void _proceedToCheckout(BuildContext context) async {
+  void _addToCart(BuildContext context) async {
     if (_selectedSlot == null) return;
-    
+
     final cartCubit = context.read<CartCubit>();
-    
+
     try {
-      await cartCubit.addToCart(service: widget.service, car: widget.car);
-      
+      await cartCubit.addToCart(
+        service: widget.service,
+        car: widget.car,
+        timeSlot: _selectedSlot, // Pass the selected time slot
+      );
+
       if (context.mounted) {
         // Navigate back to home and show success
         Navigator.popUntil(context, (route) => route.isFirst);
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              '${widget.service.title} scheduled for ${_selectedSlot!.dayLabel} ${_selectedSlot!.timeRange}',
+              '${widget.service.title} scheduled for ${_selectedSlot!.dayLabel} ${_selectedSlot!.timeRange} added to cart!',
             ),
             behavior: SnackBarBehavior.floating,
             backgroundColor: Colors.green,
@@ -562,6 +589,14 @@ class _TimeSlotSelectionPageState extends State<TimeSlotSelectionPage>
               left: 16,
               right: 16,
             ),
+            action: SnackBarAction(
+              label: 'View Cart',
+              textColor: Colors.white,
+              onPressed: () {
+                // Navigate to cart page
+                Navigator.pushNamed(context, '/cart');
+              },
+            ),
           ),
         );
       }
@@ -569,7 +604,7 @@ class _TimeSlotSelectionPageState extends State<TimeSlotSelectionPage>
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to schedule service: $e'),
+            content: Text('Failed to add to cart: $e'),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
             margin: const EdgeInsets.only(
