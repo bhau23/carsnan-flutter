@@ -18,16 +18,23 @@ class TopActionBar extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(AppSizes.mediumPadding),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Address selector
+          // Address selector - takes up slightly more space
           Expanded(
-            child: AddressSelector(),
+            flex: 3,
+            child: Container(
+              height: 88, // Increased height to accommodate content better
+              child: AddressSelector(),
+            ),
           ),
-          const SizedBox(width: AppSizes.mediumPadding),
-          // Vehicle selector  
+          const SizedBox(width: 12),
+          // Vehicle selector - takes up slightly less space
           Expanded(
-            child: AddCarButton(),
+            flex: 2,
+            child: Container(
+              height: 88, // Increased height to accommodate content better
+              child: AddCarButton(),
+            ),
           ),
         ],
       ),

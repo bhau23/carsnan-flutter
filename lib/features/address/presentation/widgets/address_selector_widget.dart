@@ -48,20 +48,18 @@ class _AddressSelectorWidget extends StatelessWidget {
       onTap: () => _showAddressBottomSheet(context),
       borderRadius: BorderRadius.circular(AppSizes.mediumRadius),
       child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSizes.mediumPadding,
-          vertical: 12,
-        ),
+        height: double.infinity, // Fill the parent container height
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: theme.colorScheme.surface,
           borderRadius: BorderRadius.circular(AppSizes.mediumRadius),
           border: Border.all(
             color: theme.colorScheme.primary.withValues(alpha: 0.2),
-            width: 1,
+            width: 1.5,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
+              color: Colors.black.withValues(alpha: 0.08),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -70,22 +68,22 @@ class _AddressSelectorWidget extends StatelessWidget {
         child: Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(6),
+              padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 color: theme.colorScheme.primary,
-                shape: BoxShape.circle,
+                borderRadius: BorderRadius.circular(8),
               ),
               child: const Icon(
                 Icons.location_on,
                 color: Colors.white,
-                size: 16,
+                size: 18,
               ),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
                     address.title.isNotEmpty
@@ -94,16 +92,17 @@ class _AddressSelectorWidget extends StatelessWidget {
                     style: theme.textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: theme.colorScheme.onSurface,
-                      fontSize: 14,
+                      fontSize: 13,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
+                  const SizedBox(height: 1),
                   Text(
                     address.displayAddress,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                      fontSize: 12,
+                      fontSize: 10,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -144,10 +143,8 @@ class _AddAddressButtonWidget extends StatelessWidget {
       onTap: () => _showAddAddressPage(context),
       borderRadius: BorderRadius.circular(AppSizes.mediumRadius),
       child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSizes.mediumPadding,
-          vertical: 12,
-        ),
+        height: double.infinity, // Fill the parent container height
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: theme.colorScheme.surface,
           borderRadius: BorderRadius.circular(AppSizes.mediumRadius),
@@ -157,7 +154,7 @@ class _AddAddressButtonWidget extends StatelessWidget {
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
+              color: Colors.black.withValues(alpha: 0.08),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -166,36 +163,37 @@ class _AddAddressButtonWidget extends StatelessWidget {
         child: Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(6),
+              padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 color: theme.colorScheme.primary.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
+                borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(
                 Icons.add_location,
                 color: theme.colorScheme.primary,
-                size: 16,
+                size: 18,
               ),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
                     'Add Address',
                     style: theme.textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: theme.colorScheme.primary,
-                      fontSize: 14,
+                      fontSize: 13,
                     ),
                   ),
+                  const SizedBox(height: 1),
                   Text(
                     'Your delivery location',
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                      fontSize: 12,
+                      fontSize: 10,
                     ),
                   ),
                 ],
